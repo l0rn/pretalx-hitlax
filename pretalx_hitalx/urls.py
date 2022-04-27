@@ -1,27 +1,26 @@
 from django.urls import path
 
-from .views import SpeakerExpenseList, SpeakerExpenseDetail, MarkExpenseView
+from .views import MarkExpenseView, SpeakerExpenseDetail, SpeakerExpenseList
 
 urlpatterns = [
     path(
         "orga/event/<slug:event>/speakers/<int:speaker_id>/expenses/",
         view=SpeakerExpenseList.as_view(),
-        name='expenses.view'
+        name="expenses.view",
     ),
     path(
         "orga/event/<slug:event>/speakers/<int:speaker_id>/expenses/new",
         view=SpeakerExpenseDetail.as_view(),
-        name='expenses.create'
+        name="expenses.create",
     ),
     path(
         "orga/event/<slug:event>/speakers/<int:speaker_id>/expense/<int:pk>",
         view=SpeakerExpenseDetail.as_view(),
-        name='expense.view'
+        name="expense.view",
     ),
     path(
         "orga/event/<slug:event>/speakers/<int:speaker_id>/expense/<int:pk>/mark",
         view=MarkExpenseView.as_view(),
-        name='expense.mark'
+        name="expense.mark",
     ),
-
 ]

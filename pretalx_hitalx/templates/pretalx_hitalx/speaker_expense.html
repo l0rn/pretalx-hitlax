@@ -9,31 +9,31 @@
     {% translate 'Expense for ' %}{{ form.instance.speaker.get_display_name }} ({{ form.instance.description }})
 {% endblock %}
 {% block content %}
-  <h2>
-    {% translate 'Expense for ' %}{{ form.instance.speaker.get_display_name }} ({{ form.instance.description }})
-  </h2>
-  <form method="post">
-    {% csrf_token %}
-    {% bootstrap_form_errors form %}
-    {% bootstrap_form form layout='event' %}
+    <h2>
+        {% translate 'Expense for ' %}{{ form.instance.speaker.get_display_name }} ({{ form.instance.description }})
+    </h2>
+    <form method="post">
+        {% csrf_token %}
+        {% bootstrap_form_errors form %}
+        {% bootstrap_form form layout='event' %}
 
-    <div class="submit-group panel">
+        <div class="submit-group panel">
             <span>
             </span>
-      <span>
+            <span>
                 <button type="submit" class="btn btn-success btn-lg">
                     <i class="fa fa-check"></i>
                     {% translate "Save" %}
                 </button>
             </span>
+        </div>
+    </form>
+    <div class="dashboard-history">
+        <h3>{% translate 'Activity Log' %}</h3>
+        {% include "common/logs.html" with entries=log_entries hide_title=True %}
+        {% if not log_entries %}
+            <span>{% translate 'No activity log yet' %}</span>
+        {% endif %}
+        {% include "orga/pagination.html" %}
     </div>
-  </form>
-  <div class="dashboard-history">
-    <h3>{% translate 'Activity Log' %}</h3>
-    {% include "common/logs.html" with entries=log_entries hide_title=True %}
-    {% if not log_entries %}
-        <span>{% translate 'No activity log yet' %}</span>
-    {% endif %}
-    {% include "orga/pagination.html" %}
-  </div>
 {% endblock %}

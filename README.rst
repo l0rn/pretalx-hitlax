@@ -1,5 +1,5 @@
 Hitalx, the hedonist pretalx plugin
-==========================
+===================================
 
 This is a plugin for `pretalx`_.
 

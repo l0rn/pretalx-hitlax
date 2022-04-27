@@ -1,6 +1,6 @@
-from django.forms import ModelForm, CharField
-
+from django.forms import CharField, ModelForm
 from pretalx.common.mixins.forms import ReadOnlyFlag
+
 from .models import ExpenseItem
 
 
@@ -9,11 +9,10 @@ class SpeakerExpenseForm(ReadOnlyFlag, ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['speaker'].disabled = True
-        self.fields['paid'].disabled = True
+        self.fields["speaker"].disabled = True
+        self.fields["paid"].disabled = True
 
     class Meta:
         model = ExpenseItem
-        fields = ['speaker', 'description', 'amount', 'paid', 'reference', 'notes']
-        readonly_fields = ['speaker', 'paid']
-
+        fields = ["speaker", "description", "amount", "paid", "reference", "notes"]
+        readonly_fields = ["speaker", "paid"]

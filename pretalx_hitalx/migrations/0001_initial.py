@@ -15,13 +15,25 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='ExpenseItem',
+            name="ExpenseItem",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False)),
-                ('description', models.TextField()),
-                ('amount', models.DecimalField(decimal_places=2, max_digits=999)),
-                ('paid', models.BooleanField(default=False)),
-                ('speaker', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='expenses', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True, primary_key=True, serialize=False
+                    ),
+                ),
+                ("description", models.TextField()),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=999)),
+                ("paid", models.BooleanField(default=False)),
+                (
+                    "speaker",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="expenses",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

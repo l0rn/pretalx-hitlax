@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pretalx_hitalx', '0001_initial'),
+        ("pretalx_hitalx", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='expenseitem',
-            name='notes',
-            field=models.TextField(default=''),
+            model_name="expenseitem",
+            name="notes",
+            field=models.TextField(default=""),
         ),
         migrations.AddField(
-            model_name='expenseitem',
-            name='reference',
+            model_name="expenseitem",
+            name="reference",
             field=models.URLField(null=True),
         ),
     ]

@@ -9,7 +9,9 @@ class PluginApp(AppConfig):
     class PretalxPluginMeta:
         name = gettext_lazy("Pretalx Hitalx")
         author = "Jonatan Zint"
-        description = gettext_lazy("Various features specifically for the Hedonist International")
+        description = gettext_lazy(
+            "Various features specifically for the Hedonist International"
+        )
         visible = True
         version = "0.0.1"
 

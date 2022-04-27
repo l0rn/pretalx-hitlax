@@ -5,57 +5,57 @@
 {% load url_replace %}
 
 {% block content %}
-  <h2>
-    {% translate 'Expenses for ' %}{{ speaker_profile.user.get_display_name }}
-  </h2>
+    <h2>
+        {% translate 'Expenses for ' %}{{ speaker_profile.user.get_display_name }}
+    </h2>
 
-  <div class="submit-group">
-    <span></span>
-    <span>
-      <a
-        href="{% url 'plugins:pretalx_hitalx:expenses.create' event=request.event.slug speaker_id=speaker_profile.user.id %}"
-        class="btn btn-success">
+    <div class="submit-group">
+        <span></span>
+        <span>
+            <a
+                href="{% url 'plugins:pretalx_hitalx:expenses.create' event=request.event.slug speaker_id=speaker_profile.user.id %}"
+                class="btn btn-success">
                 <i class="fa fa-plus"></i>
                 {% translate "Add a new expense" %}
             </a>
         </span>
-  </div>
-  <div class="table-responsive">
-    <table class="table table-sm table-hover table-flip">
-      <thead>
-      <tr>
-        <th>{% translate "Description" %}</th>
-        <th>{% translate "Amount" %}</th>
-        <th>{% translate "Paid" %}</th>
-      </tr>
-      </thead>
-      <tbody>
-      {% for expense in object_list %}
-        {% has_perm 'orga.change_speaker' request.user speaker_profile as can_edit_speaker %}
-        <tr>
-          <td><a
-            href="{% url 'plugins:pretalx_hitalx:expense.view' event=request.event.slug speaker_id=expense.speaker.id pk=expense.id %} ">{{ expense.description }}</a>
-          </td>
-          <td>{{ expense.amount }}</td>
-          <td>
-            <i
-              class="fa fa-lg text-{{ expense.paid|yesno:'success,secondary' }} fa-{{ expense.paid|yesno:'check,close' }}"></i>
-            <form style="display: inline" method="post" action="{% url 'plugins:pretalx_hitalx:expense.mark' event=request.event.slug speaker_id=expense.speaker.id pk=expense.id %}">
-              {% csrf_token %}
-              <input type="hidden" name="paid" value="{{ expense.paid|yesno:'false,true' }}">
-              {% if can_edit_speaker %}
-                {% if expense.paid %}
-                  <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Mark as unpaid" %}</button>
-                {% else %}
-                  <button class="btn btn-sm btn-outline-primary" type="submit">{% translate "Mark as paid" %}</button>
-                {% endif %}
-              {% endif %}
-            </form>
-          </td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% include "orga/pagination.html" %}
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm table-hover table-flip">
+            <thead>
+                <tr>
+                    <th>{% translate "Description" %}</th>
+                    <th>{% translate "Amount" %}</th>
+                    <th>{% translate "Paid" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in object_list %}
+                    {% has_perm 'orga.change_speaker' request.user speaker_profile as can_edit_speaker %}
+                    <tr>
+                        <td><a
+                            href="{% url 'plugins:pretalx_hitalx:expense.view' event=request.event.slug speaker_id=expense.speaker.id pk=expense.id %} ">{{ expense.description }}</a>
+                        </td>
+                        <td>{{ expense.amount }}</td>
+                        <td>
+                            <i
+                                class="fa fa-lg text-{{ expense.paid|yesno:'success,secondary' }} fa-{{ expense.paid|yesno:'check,close' }}"></i>
+                            <form style="display: inline" method="post" action="{% url 'plugins:pretalx_hitalx:expense.mark' event=request.event.slug speaker_id=expense.speaker.id pk=expense.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="paid" value="{{ expense.paid|yesno:'false,true' }}">
+                                {% if can_edit_speaker %}
+                                    {% if expense.paid %}
+                                        <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Mark as unpaid" %}</button>
+                                    {% else %}
+                                        <button class="btn btn-sm btn-outline-primary" type="submit">{% translate "Mark as paid" %}</button>
+                                    {% endif %}
+                                {% endif %}
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "orga/pagination.html" %}
 {% endblock %}
