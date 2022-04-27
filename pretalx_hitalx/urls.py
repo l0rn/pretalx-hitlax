@@ -1,8 +1,13 @@
 from django.urls import path
 
-from .views import MarkExpenseView, SpeakerExpenseDetail, SpeakerExpenseList
+from .views import MarkExpenseView, SpeakerExpenseDetail, SpeakerExpenseList, SpeakerList
 
 urlpatterns = [
+    path(
+        "orga/event/<slug:event>/speakers-by-expense/",
+        view=SpeakerList.as_view(),
+        name="speakers_by_expense.view",
+    ),
     path(
         "orga/event/<slug:event>/speakers/<int:speaker_id>/expenses/",
         view=SpeakerExpenseList.as_view(),
