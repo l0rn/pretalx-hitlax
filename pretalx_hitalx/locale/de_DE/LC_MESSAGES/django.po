@@ -1,0 +1,75 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-04-27 10:37+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: pretalx-hitalx/pretalx_hitalx/apps.py:10
+msgid "Pretalx Hitalx"
+msgstr ""
+
+#: pretalx-hitalx/pretalx_hitalx/apps.py:12
+msgid "Various features specifically for the Hedonist International"
+msgstr "Diverse Features für die Hedonistische Internationalse"
+
+#: pretalx-hitalx/pretalx_hitalx/models.py:13
+msgid "Reference URL"
+msgstr "Referenz URL"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:9
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:13
+msgid "Expense for "
+msgstr "Ausgabe für "
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:26
+msgid "Save"
+msgstr "Speichern"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:32
+msgid "Activity Log"
+msgstr "Bearbeitungs Log"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:35
+msgid "No activity log yet"
+msgstr "Keine Einträge bisher"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:9
+msgid "Expenses for "
+msgstr "Ausgaben für "
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:19
+msgid "Add a new expense"
+msgstr "Neue Ausgabe hinzufügen"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:27
+msgid "Description"
+msgstr "Beschreibung"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:28
+msgid "Amount"
+msgstr "Betrag"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:29
+msgid "Paid"
+msgstr "Bezahlt / Ausgezahlt"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:48
+msgid "Mark as unpaid"
+msgstr "Als unbezahlt markieren"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:50
+msgid "Mark as paid"
+msgstr "Als bezahlt markieren"
