@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("description", models.TextField()),
-                ("amount", models.DecimalField(decimal_places=2, max_digits=999)),
+                ("amount", models.DecimalField(decimal_places=2, max_digits=60)),
                 ("paid", models.BooleanField(default=False)),
                 (
                     "speaker",
