@@ -7,7 +7,7 @@ from pretalx.person.models import User
 class ExpenseItem(LogMixin, models.Model):
     description = models.TextField(blank=False, null=False)
     amount = models.DecimalField(
-        blank=False, null=False, decimal_places=2, max_digits=999
+        blank=False, null=False, decimal_places=2, max_digits=60
     )
     speaker = models.ForeignKey(User, on_delete=models.CASCADE, related_name="expenses")
     notes = models.TextField(blank=True, default="")
