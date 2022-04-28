@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load rules %}
 {% load url_replace %}
+{% load pretalx_hitalx %}
 
 {% block content %}
     <h2>
@@ -36,7 +37,7 @@
                         <td><a
                             href="{% url 'plugins:pretalx_hitalx:expense.view' event=request.event.slug speaker_id=expense.speaker.id pk=expense.id %} ">{{ expense.description }}</a>
                         </td>
-                        <td>{{ expense.amount }}</td>
+                        <td>{{ expense.amount | euro_amount }}</td>
                         <td>
                             <i
                                 class="fa fa-lg text-{{ expense.paid|yesno:'success,secondary' }} fa-{{ expense.paid|yesno:'check,close' }}"></i>
