@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-27 10:37+0000\n"
+"POT-Creation-Date: 2022-04-28 07:17+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,13 +21,31 @@ msgstr ""
 msgid "Pretalx Hitalx"
 msgstr ""
 
-#: pretalx-hitalx/pretalx_hitalx/apps.py:12
+#: pretalx-hitalx/pretalx_hitalx/apps.py:13
 msgid "Various features specifically for the Hedonist International"
 msgstr "Diverse Features für die Hedonistische Internationalse"
 
-#: pretalx-hitalx/pretalx_hitalx/models.py:13
+#: pretalx-hitalx/pretalx_hitalx/models.py:14
 msgid "Reference URL"
 msgstr "Referenz URL"
+
+#: pretalx-hitalx/pretalx_hitalx/signals.py:14
+#, fuzzy
+#| msgid "Add a new expense"
+msgid "Speaker expenses"
+msgstr "Ausgaben für Speaker"
+
+#: pretalx-hitalx/pretalx_hitalx/signals.py:24
+msgid "Speaker expense was edited"
+msgstr "Ausgabe wurde editiert"
+
+#: pretalx-hitalx/pretalx_hitalx/signals.py:25
+msgid "Speaker expense was created"
+msgstr "Ausgabe wurde erstellt"
+
+#: pretalx-hitalx/pretalx_hitalx/signals.py:26
+msgid "Expense paid status was changed"
+msgstr "Bezahltstatus wurde geändert"
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:9
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:13
@@ -73,3 +91,30 @@ msgstr "Als unbezahlt markieren"
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:50
 msgid "Mark as paid"
 msgstr "Als bezahlt markieren"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:11
+msgid "submitter"
+msgid_plural "submitters"
+msgstr[0] ""
+msgstr[1] ""
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:22
+msgid "Search"
+msgstr "Suche"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:28
+#, python-format
+msgid "List filtered by answers to question \"%(question)s\"."
+msgstr ""
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:33
+msgid "Remove filter"
+msgstr "Filter entfernen"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:43
+msgid "Name"
+msgstr "Name"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:44
+msgid "Expenses (Paid / Total)"
+msgstr "Ausgaben (Bezahlt / Gesamt)"

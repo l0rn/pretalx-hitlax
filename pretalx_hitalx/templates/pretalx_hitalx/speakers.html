@@ -41,14 +41,14 @@
             <thead>
                 <tr>
                     <th>{% translate "Name" %}</th>
-                    <th>{% translate "Expenses (Total)" %}</th>
+                    <th>{% translate "Expenses (Paid / Total)" %}</th>
                 </tr>
             </thead>
             <tbody>
                 {% for profile in speakers %}
                     <tr>
                         <td><a href="{{ profile.orga_urls.base }}">{{ profile.user.get_display_name }}</a></td>
-                        <td><a href="{% url "plugins:pretalx_hitalx:expenses.view" event=request.event.slug speaker_id=profile.user.id %}">{{ profile.user | total_expenses }}</a></td>
+                        <td><a href="{% url "plugins:pretalx_hitalx:expenses.view" event=request.event.slug speaker_id=profile.user.id %}">{{ profile.user | total_expenses }} / {{ profile.user | total_expenses }}</a></td>
                     </tr>
                 {% endfor %}
             </tbody>
