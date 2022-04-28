@@ -1,6 +1,11 @@
 from django.urls import path
 
-from .views import MarkExpenseView, SpeakerExpenseDetail, SpeakerExpenseList, SpeakerList
+from .views import (
+    MarkExpenseView,
+    SpeakerExpenseDetail,
+    SpeakerExpenseList,
+    SpeakerList,
+)
 
 urlpatterns = [
     path(

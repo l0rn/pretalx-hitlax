@@ -1,7 +1,7 @@
 from functools import cached_property
 
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Count, Q, Exists, OuterRef
+from django.db.models import Count, Exists, OuterRef, Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import reverse
 from django.views.generic import ListView, View
@@ -9,13 +9,15 @@ from django_context_decorator import context
 from pretalx.common.mixins.views import (
     ActionFromUrl,
     EventPermissionRequired,
-    PermissionRequired, Sortable, Filterable,
+    Filterable,
+    PermissionRequired,
+    Sortable,
 )
 from pretalx.common.models import ActivityLog
 from pretalx.common.views import CreateOrUpdateView
 from pretalx.person.forms import SpeakerFilterForm
 from pretalx.person.models import SpeakerProfile
-from pretalx.submission.models import SubmissionStates, Answer
+from pretalx.submission.models import Answer, SubmissionStates
 
 from .form import SpeakerExpenseForm
 from .models import ExpenseItem
