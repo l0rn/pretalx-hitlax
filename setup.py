@@ -24,7 +24,7 @@ cmdclass = {"build": CustomBuild}
 
 setup(
     name="pretalx-hitalx",
-    version="0.0.6",
+    version="0.0.7",
     description="Some utilities specifically for the Hedonist International",
     long_description=long_description,
     url="https://github.com/l0rn/pretalx-hitlax",

@@ -13,7 +13,7 @@ class PluginApp(AppConfig):
             "Various features specifically for the Hedonist International"
         )
         visible = True
-        version = "0.0.6"
+        version = "0.0.7"
 
     def ready(self):
         from . import signals  # NOQA
