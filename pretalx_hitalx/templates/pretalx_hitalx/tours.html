@@ -6,33 +6,65 @@
 {% load pretalx_hitalx %}
 
 {% block content %}
-    <h2>
-        {% translate 'Tours' %}
-    </h2>
+  <h2>
+    {% translate 'Tours' %}
+  </h2>
+  <div class="submit-group">
 
-    <div class="table-responsive">
-        <table class="table table-sm table-hover table-flip">
-            <thead>
-            <tr>
-                <th>{% translate "Description" %}</th>
-                <th>{% translate "Location" %}</th>
-                <th>{% translate "Date / Time" %}</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for tour in tours %}
-                <tr>
-                    <td><a href="#">{{ tour.description }}</a></td>
-                    <td>
-                        {{ tour.start_location }}
-                    </td>
-                    <td>
-                        {{ tour.departure_time }}
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% include "orga/pagination.html" %}
+  </div>
+
+  <div class="submit-group">
+    <form class="search-form" style="width: auto;">
+      {% bootstrap_form filter_form %}
+      <button class="btn btn-info btn-search" type="submit">{% translate "Filter" %}</button>
+    </form>
+    <span>
+            <a href="{% url 'plugins:pretalx_hitalx:tour.create' event=request.event.slug %}" class="btn btn-success">
+                <i class="fa fa-plus"></i>
+                {% translate "Add a new Tour" %}
+            </a>
+        </span>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-sm table-hover table-flip">
+      <thead>
+      <tr>
+        <th>{% translate "Type" %}</th>
+        <th>{% translate "Description" %}</th>
+        <th>{% translate "Location" %}</th>
+        <th>{% translate "Date / Time" %}</th>
+        <th>{% translate "Actions" %}</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for tour in tours %}
+        <tr>
+          <td>{{ tour.type }}</td>
+          <td><a
+            href="{% url 'plugins:pretalx_hitalx:tour.view' event=request.event.slug pk=tour.pk %}">{{ tour.description }}</a>
+          </td>
+          <td>
+            {{ tour.start_location }}
+          </td>
+          <td>
+            {{ tour.departure_time }}
+          </td>
+          <td class="action-column">
+            <a href="{% url 'plugins:pretalx_hitalx:tour.view' event=request.event.slug pk=tour.pk %}"
+               class="btn btn-sm btn-info"
+               title="{% translate "Edit" %}">
+              <i class="fa fa-edit"></i>
+            </a>
+            <a href="{% url 'plugins:pretalx_hitalx:tour.delete' event=request.event.slug pk=tour.pk %}"
+               class="btn btn-sm btn-danger"
+               title="{% translate "Delete" %}">
+              <i class="fa fa-trash"></i>
+            </a>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "orga/pagination.html" %}
 {% endblock %}

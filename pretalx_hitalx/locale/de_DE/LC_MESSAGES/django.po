@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-04-28 07:17+0000\n"
+"POT-Creation-Date: 2022-05-03 10:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +25,15 @@ msgstr ""
 msgid "Various features specifically for the Hedonist International"
 msgstr "Diverse Features für die Hedonistische Internationalse"
 
-#: pretalx-hitalx/pretalx_hitalx/models.py:14
+#: pretalx-hitalx/pretalx_hitalx/models.py:16
+msgid "Shuttle"
+msgstr "Shuttle"
+
+#: pretalx-hitalx/pretalx_hitalx/models.py:17
+msgid "Bassliner"
+msgstr "Bassliner"
+
+#: pretalx-hitalx/pretalx_hitalx/models.py:28
 msgid "Reference URL"
 msgstr "Referenz URL"
 
@@ -35,17 +43,23 @@ msgstr "Referenz URL"
 msgid "Speaker expenses"
 msgstr "Ausgaben für Speaker"
 
-#: pretalx-hitalx/pretalx_hitalx/signals.py:24
+#: pretalx-hitalx/pretalx_hitalx/signals.py:29
 msgid "Speaker expense was edited"
 msgstr "Ausgabe wurde editiert"
 
-#: pretalx-hitalx/pretalx_hitalx/signals.py:25
+#: pretalx-hitalx/pretalx_hitalx/signals.py:30
 msgid "Speaker expense was created"
 msgstr "Ausgabe wurde erstellt"
 
-#: pretalx-hitalx/pretalx_hitalx/signals.py:26
+#: pretalx-hitalx/pretalx_hitalx/signals.py:31
 msgid "Expense paid status was changed"
 msgstr "Bezahltstatus wurde geändert"
+
+#: pretalx-hitalx/pretalx_hitalx/signals.py:44
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:26
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:10
+msgid "Tours"
+msgstr "Fahrten"
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:9
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:13
@@ -53,6 +67,8 @@ msgid "Expense for "
 msgstr "Ausgabe für "
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:26
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_tours.html:24
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tour.html:44
 msgid "Save"
 msgstr "Speichern"
 
@@ -64,57 +80,109 @@ msgstr "Bearbeitungs Log"
 msgid "No activity log yet"
 msgstr "Keine Einträge bisher"
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:9
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:10
 msgid "Expenses for "
 msgstr "Ausgaben für "
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:19
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:20
 msgid "Add a new expense"
 msgstr "Neue Ausgabe hinzufügen"
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:27
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:28
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:33
 msgid "Description"
 msgstr "Beschreibung"
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:28
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:29
 msgid "Amount"
 msgstr "Betrag"
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:29
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:30
 msgid "Paid"
 msgstr "Bezahlt / Ausgezahlt"
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:48
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:49
 msgid "Mark as unpaid"
 msgstr "Als unbezahlt markieren"
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:50
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:51
 msgid "Mark as paid"
 msgstr "Als bezahlt markieren"
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:11
-msgid "submitter"
-msgid_plural "submitters"
-msgstr[0] ""
-msgstr[1] ""
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_tours.html:12
+msgid "Tours of "
+msgstr "Fahrten von"
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:22
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:10
+#, fuzzy
+#| msgid "Add a new expense"
+msgid "Speakers"
+msgstr "Ausgaben für Speaker"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:17
 msgid "Search"
 msgstr "Suche"
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:28
-#, python-format
-msgid "List filtered by answers to question \"%(question)s\"."
-msgstr ""
-
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:33
-msgid "Remove filter"
-msgstr "Filter entfernen"
-
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:43
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:24
 msgid "Name"
 msgstr "Name"
 
-#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:44
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:25
 msgid "Expenses (Paid / Total)"
 msgstr "Ausgaben (Bezahlt / Gesamt)"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tour.html:19
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tour.html:28
+msgid "Tour: "
+msgstr "Fahrt: "
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tour.html:21
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tour.html:30
+msgid "New Tour"
+msgstr "Neue Fahrt"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tour_confirm_delete.html:5
+msgid "Do you really want to delete this tour?"
+msgstr "Willst du diese Fahrt wirklich löschen?"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tour_confirm_delete.html:11
+msgid "Back"
+msgstr "Zurück"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tour_confirm_delete.html:15
+msgid "Yes"
+msgstr "Ja"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:19
+msgid "Filter"
+msgstr "Filter"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:24
+#, fuzzy
+#| msgid "Add a new expense"
+msgid "Add a new Tour"
+msgstr "Neue Ausgabe hinzufügen"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:32
+msgid "Type"
+msgstr "Typ"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:34
+msgid "Location"
+msgstr "Ort"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:35
+msgid "Date / Time"
+msgstr "Datum / Uhrzeit"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:36
+msgid "Actions"
+msgstr "Aktionen"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:55
+msgid "Edit"
+msgstr "Editieren"
+
+#: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:60
+msgid "Delete"
+msgstr "Löschen"

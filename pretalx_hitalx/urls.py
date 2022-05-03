@@ -6,7 +6,9 @@ from .views import (
     SpeakerExpenseList,
     SpeakerList,
     SpeakerTourManagement,
-    TourListView
+    TourListView,
+    TourDetailView,
+    TourDeleteView
 )
 
 urlpatterns = [
@@ -18,12 +20,27 @@ urlpatterns = [
     path(
         "orga/event/<slug:event>/speakers/<int:pk>/tours/",
         view=SpeakerTourManagement.as_view(),
-        name="tours.view",
+        name="speaker_tours.view",
     ),
     path(
         "orga/event/<slug:event>/tours/",
         view=TourListView.as_view(),
         name="tours.view",
+    ),
+    path(
+        "orga/event/<slug:event>/tours/<int:pk>",
+        view=TourDetailView.as_view(),
+        name="tour.view",
+    ),
+    path(
+        "orga/event/<slug:event>/tours/<int:pk>/delete",
+        view=TourDeleteView.as_view(),
+        name="tour.delete",
+    ),
+    path(
+        "orga/event/<slug:event>/tours/new",
+        view=TourDetailView.as_view(),
+        name="tour.create",
     ),
     path(
         "orga/event/<slug:event>/speakers/<int:speaker_id>/expenses/",

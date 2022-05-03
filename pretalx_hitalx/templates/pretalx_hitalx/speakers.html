@@ -7,12 +7,7 @@
 
 {% block content %}
     <h2>
-        {{ page_obj.paginator.count }}
-        {% blocktranslate trimmed count count=page_obj.paginator.count %}
-            submitter
-            {% plural %}
-            submitters
-        {% endblocktranslate %}
+        {{ page_obj.paginator.count }} {% translate 'Speakers' %}
     </h2>
 
     <div class="submit-group search-submit-group">
@@ -22,20 +17,6 @@
             <button class="btn btn-info btn-search" type="submit">{% translate "Search" %}</button>
         </form>
     </div>
-    {% if filter_form.is_valid and filter_form.cleaned_data.question %}
-        <p class="text-muted ml-2">
-            <span class="fa fa-filter"></span>
-            {% blocktranslate trimmed with question=filter_form.cleaned_data.question.question %}
-                List filtered by answers to question "{{ question }}".
-            {% endblocktranslate %}
-            <a href="?{% url_replace request 'question' '' 'answer' '' 'answer__options' '' %}" class="text-muted">
-                <span class="fa fa-times"></span>
-                {% translate "Remove filter" %}
-            </a>
-        </p>
-    {% endif %}
-    {% has_perm 'orga.mark_speakers_arrived' request.user request.event as can_mark_speaker %}
-    {% has_perm 'orga.see_speakers_arrival' request.user request.event as can_see_speaker_status %}
     <div class="table-responsive">
         <table class="table table-sm table-hover table-flip">
             <thead>
@@ -53,7 +34,7 @@
                         <a href="{% url "plugins:pretalx_hitalx:expenses.view" event=request.event.slug speaker_id=profile.user.id %}">{{ profile.user | paid_expenses | euro_amount }} / {{ profile.user | total_expenses | euro_amount }}</a>
                     </td>
                     <td>
-                        <a href="{% url "plugins:pretalx_hitalx:tours.view" event=request.event.slug pk=profile.id %}">{{ profile.tours.count }}</a>
+                        <a href="{% url "plugins:pretalx_hitalx:speaker_tours.view" event=request.event.slug pk=profile.id %}">{{ profile.tours.count }}</a>
                     </td>
                 </tr>
             {% endfor %}

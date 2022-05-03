@@ -3,8 +3,8 @@ from functools import cached_property
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Exists, OuterRef, Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import reverse
-from django.views.generic import ListView, View
+from django.shortcuts import reverse, get_object_or_404
+from django.views.generic import ListView, View, DeleteView
 from django_context_decorator import context
 from pretalx.common.mixins.views import (
     ActionFromUrl,
@@ -15,11 +15,12 @@ from pretalx.common.mixins.views import (
 )
 from pretalx.common.models import ActivityLog
 from pretalx.common.views import CreateOrUpdateView
+from pretalx.event.models import Event
 from pretalx.person.forms import SpeakerFilterForm
 from pretalx.person.models import SpeakerProfile
 from pretalx.submission.models import Answer, SubmissionStates
 
-from .form import SpeakerExpenseForm, SpeakerToursForm
+from .form import SpeakerExpenseForm, SpeakerToursForm, TourForm
 from .models import ExpenseItem, Tour
 
 
@@ -259,8 +260,63 @@ class SpeakerTourManagement(PermissionRequired, ActionFromUrl, CreateOrUpdateVie
         )
 
 
-class TourListView(EventPermissionRequired, Sortable, ListView):
+class TourListView(EventPermissionRequired, Sortable, Filterable, ListView):
     template_name = "pretalx_hitalx/tours.html"
     model = Tour
     context_object_name = "tours"
+    filter_fields = ['type']
     permission_required = "orga.view_speaker"
+
+    def get_queryset(self):
+        qs = Tour.objects.filter(event__slug=self.request.event.slug)
+        qs = self.filter_queryset(qs)
+        return qs
+
+
+class TourDetailView(EventPermissionRequired, Sortable, CreateOrUpdateView):
+    template_name = "pretalx_hitalx/tour.html"
+    model = Tour
+    form_class = TourForm
+    permission_required = "orga.view_speaker"
+
+    def get_form(self, form_class=None):
+        if form_class is None:
+            form_class = self.get_form_class()
+        return form_class(
+            **{
+                **self.get_form_kwargs(),
+                "initial": {"event": Event.objects.filter(slug=self.kwargs["event"]).first().id},
+            }
+        )
+
+    def get_object(self):
+        return Tour.objects.filter(pk=self.kwargs.get("pk")).first()
+
+    @cached_property
+    def object(self):
+        return self.get_object()
+
+    def get_success_url(self) -> str:
+        return reverse(
+            "plugins:pretalx_hitalx:tours.view",
+            kwargs={
+                "event": self.request.event.slug
+            },
+        )
+
+
+class TourDeleteView(EventPermissionRequired, DeleteView):
+    permission_required = "orga.view_speaker"
+
+    def get_object(self):
+        return get_object_or_404(
+            Tour.objects.all(), event=self.request.event, pk=self.kwargs.get("pk")
+        )
+
+    def get_success_url(self) -> str:
+        return reverse(
+            "plugins:pretalx_hitalx:tours.view",
+            kwargs={
+                "event": self.request.event.slug
+            },
+        )

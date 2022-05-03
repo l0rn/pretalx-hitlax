@@ -13,8 +13,8 @@ class TourType(Enum):
 
 
 TOUR_TYPE_CHOICES = [
-    (TourType.SHUTTLE, _('Shuttle')),
-    (TourType.BASSLINER, _('Bassliner')),
+    (TourType.SHUTTLE.value, _('Shuttle')),
+    (TourType.BASSLINER.value, _('Bassliner')),
 ]
 
 
@@ -36,3 +36,6 @@ class Tour(models.Model):
     passengers = models.ManyToManyField(SpeakerProfile, related_name='tours')
     type = models.TextField(choices=TOUR_TYPE_CHOICES)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.type} - {self.description} - {self.start_location} - {self.departure_time}'

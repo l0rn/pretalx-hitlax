@@ -1,0 +1,49 @@
+{% extends "orga/cfp/base.html" %}
+{% load bootstrap4 %}
+{% load compress %}
+{% load i18n %}
+{% load rules %}
+{% load static %}
+
+{% block scripts %}
+    {% compress js %}
+        <script defer src="{% static "vendored/moment-with-locales.js" %}"></script>
+        <script defer src="{% static "vendored/moment-timezone-with-data-2012-2022.js" %}"></script>
+        <script defer src="{% static "vendored/datetimepicker/bootstrap-datetimepicker.js" %}"></script>
+        <script defer src="{% static "orga/js/datetimepicker.js" %}"></script>
+    {% endcompress %}
+{% endblock %}
+
+{% block title %}
+  {% if form.instance.pk %}
+    {% translate 'Tour: ' %}{{ form.instance.description }}
+  {% else %}
+    {% translate 'New Tour' %}
+  {% endif %}
+{% endblock %}
+{% block content %}
+  <h2>
+
+    {% if form.instance.pk %}
+      {% translate 'Tour: ' %}{{ form.instance.description }}
+    {% else %}
+      {% translate 'New Tour' %}
+    {% endif %}
+  </h2>
+  <form method="post">
+    {% csrf_token %}
+    {% bootstrap_form_errors form %}
+    {% bootstrap_form form layout='event' %}
+
+    <div class="submit-group panel">
+      <span>
+      </span>
+      <span>
+        <button type="submit" class="btn btn-success btn-lg">
+            <i class="fa fa-check"></i>
+            {% translate "Save" %}
+        </button>
+      </span>
+    </div>
+  </form>
+{% endblock %}
