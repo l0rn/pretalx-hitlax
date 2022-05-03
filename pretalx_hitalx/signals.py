@@ -36,3 +36,16 @@ PLUGIN_ACTION_TYPES = {
 def default_activitylog_display(sender, activitylog, **kwargs):
     if activitylog.action_type in PLUGIN_ACTION_TYPES:
         return f"{PLUGIN_ACTION_TYPES[activitylog.action_type]} ({activitylog.data})"
+
+@receiver(nav_event, dispatch_uid='tours')
+def navbar_info(sender, request, **kwargs):
+    url = resolve(request.path_info)
+    return [{
+        'label': _('Tours'),
+        'icon': 'bus',
+        'url': reverse('plugins:pretalx_hitalx:tours.view', kwargs={
+            'event': request.event.slug,
+        }),
+        'active': url.namespace == 'plugins:pretalx_hitalx' and url.url_name == 'tours.view',
+    }]
+

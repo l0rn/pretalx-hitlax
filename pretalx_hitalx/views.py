@@ -19,8 +19,8 @@ from pretalx.person.forms import SpeakerFilterForm
 from pretalx.person.models import SpeakerProfile
 from pretalx.submission.models import Answer, SubmissionStates
 
-from .form import SpeakerExpenseForm
-from .models import ExpenseItem
+from .form import SpeakerExpenseForm, SpeakerToursForm
+from .models import ExpenseItem, Tour
 
 
 class SpeakerList(EventPermissionRequired, Sortable, Filterable, ListView):
@@ -241,3 +241,26 @@ class MarkExpenseView(PermissionRequired, View):
                     },
                 )
             )
+
+
+class SpeakerTourManagement(PermissionRequired, ActionFromUrl, CreateOrUpdateView):
+    template_name = "pretalx_hitalx/speaker_tours.html"
+    form_class = SpeakerToursForm
+    model = SpeakerProfile
+    permission_required = "orga.view_speaker"
+    write_permission_required = "orga.change_speaker"
+
+    def get_success_url(self) -> str:
+        return reverse(
+            "plugins:pretalx_hitalx:speakers_by_expense.view",
+            kwargs={
+                "event": self.request.event.slug
+            },
+        )
+
+
+class TourListView(EventPermissionRequired, Sortable, ListView):
+    template_name = "pretalx_hitalx/tours.html"
+    model = Tour
+    context_object_name = "tours"
+    permission_required = "orga.view_speaker"

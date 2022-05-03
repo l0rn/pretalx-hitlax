@@ -1,7 +1,21 @@
+from enum import Enum
+
 from django.db import models
 from django.utils.translation import ugettext as _
 from pretalx.common.mixins.models import LogMixin
-from pretalx.person.models import User
+from pretalx.event.models import Event
+from pretalx.person.models import User, SpeakerProfile
+
+
+class TourType(Enum):
+    BASSLINER = 'BASSLINER'
+    SHUTTLE = 'SHUTTLE'
+
+
+TOUR_TYPE_CHOICES = [
+    (TourType.SHUTTLE, _('Shuttle')),
+    (TourType.BASSLINER, _('Bassliner')),
+]
 
 
 class ExpenseItem(LogMixin, models.Model):
@@ -13,3 +27,12 @@ class ExpenseItem(LogMixin, models.Model):
     notes = models.TextField(blank=True, default="")
     reference = models.URLField(blank=True, null=True, verbose_name=_("Reference URL"))
     paid = models.BooleanField(default=False)
+
+
+class Tour(models.Model):
+    description = models.TextField(blank=False, null=False)
+    departure_time = models.DateTimeField(null=False, blank=False)
+    start_location = models.TextField(null=False, blank=False)
+    passengers = models.ManyToManyField(SpeakerProfile, related_name='tours')
+    type = models.TextField(choices=TOUR_TYPE_CHOICES)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)

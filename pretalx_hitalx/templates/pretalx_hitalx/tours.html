@@ -1,0 +1,38 @@
+{% extends "orga/cfp/base.html" %}
+{% load bootstrap4 %}
+{% load i18n %}
+{% load rules %}
+{% load url_replace %}
+{% load pretalx_hitalx %}
+
+{% block content %}
+    <h2>
+        {% translate 'Tours' %}
+    </h2>
+
+    <div class="table-responsive">
+        <table class="table table-sm table-hover table-flip">
+            <thead>
+            <tr>
+                <th>{% translate "Description" %}</th>
+                <th>{% translate "Location" %}</th>
+                <th>{% translate "Date / Time" %}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for tour in tours %}
+                <tr>
+                    <td><a href="#">{{ tour.description }}</a></td>
+                    <td>
+                        {{ tour.start_location }}
+                    </td>
+                    <td>
+                        {{ tour.departure_time }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% include "orga/pagination.html" %}
+{% endblock %}

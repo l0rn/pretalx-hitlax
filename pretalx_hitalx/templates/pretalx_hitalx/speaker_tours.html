@@ -1,0 +1,29 @@
+{% extends "orga/cfp/base.html" %}
+{% load bootstrap4 %}
+{% load compress %}
+{% load i18n %}
+{% load rules %}
+{% load static %}
+
+{% block title %}{{ form.instance.user.get_display_name }} :: {{ request.event.name }} Tours{% endblock %}
+{% block content %}
+    {% has_perm 'orga.change_speaker' request.user form.instance as can_edit_speaker %}
+    <h2>
+        {% translate 'Tours of ' %}{{ form.instance.user.get_display_name }}
+    </h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% bootstrap_form_errors form %}
+        {% bootstrap_form form layout='event' %}
+        <div class="submit-group panel">
+            <span>
+            </span>
+            <span>
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fa fa-check"></i>
+                    {% translate "Save" %}
+                </button>
+            </span>
+        </div>
+    </form>
+{% endblock %}
