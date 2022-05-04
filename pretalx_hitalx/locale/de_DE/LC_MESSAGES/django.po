@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-05-03 10:11+0000\n"
+"POT-Creation-Date: 2022-05-04 07:18+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,23 +43,23 @@ msgstr "Referenz URL"
 msgid "Speaker expenses"
 msgstr "Ausgaben für Speaker"
 
-#: pretalx-hitalx/pretalx_hitalx/signals.py:29
-msgid "Speaker expense was edited"
-msgstr "Ausgabe wurde editiert"
-
-#: pretalx-hitalx/pretalx_hitalx/signals.py:30
-msgid "Speaker expense was created"
-msgstr "Ausgabe wurde erstellt"
-
-#: pretalx-hitalx/pretalx_hitalx/signals.py:31
-msgid "Expense paid status was changed"
-msgstr "Bezahltstatus wurde geändert"
-
-#: pretalx-hitalx/pretalx_hitalx/signals.py:44
+#: pretalx-hitalx/pretalx_hitalx/signals.py:25
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:26
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:10
 msgid "Tours"
 msgstr "Fahrten"
+
+#: pretalx-hitalx/pretalx_hitalx/signals.py:36
+msgid "Speaker expense was edited"
+msgstr "Ausgabe wurde editiert"
+
+#: pretalx-hitalx/pretalx_hitalx/signals.py:37
+msgid "Speaker expense was created"
+msgstr "Ausgabe wurde erstellt"
+
+#: pretalx-hitalx/pretalx_hitalx/signals.py:38
+msgid "Expense paid status was changed"
+msgstr "Bezahltstatus wurde geändert"
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:9
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:13
