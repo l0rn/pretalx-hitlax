@@ -1,0 +1,8 @@
+<h1>Tours</h1>
+
+{% for tour in tours %}
+    <h2>{{ tour.description }}</h2>
+    <span>Time: {{ tour.departure_time }}</span><br />
+    <span>Location: {{ tour.start_location }}</span><br />
+    <span>Passengers: {% for passenger in tour.passengers.all %}{{ passenger.user.get_display_name }}{% endfor %}</span>
+{% endfor %}

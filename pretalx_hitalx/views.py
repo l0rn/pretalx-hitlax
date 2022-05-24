@@ -1,9 +1,11 @@
 from functools import cached_property
 
+from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Exists, OuterRef, Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import reverse, get_object_or_404
+from django.shortcuts import reverse, get_object_or_404, render, redirect
+from django.utils.translation import ugettext
 from django.views.generic import ListView, View, DeleteView
 from django_context_decorator import context
 from pretalx.common.mixins.views import (
@@ -21,7 +23,7 @@ from pretalx.person.models import SpeakerProfile
 from pretalx.submission.models import Answer, SubmissionStates
 
 from .form import SpeakerExpenseForm, SpeakerToursForm, TourForm
-from .models import ExpenseItem, Tour
+from .models import ExpenseItem, Tour, TourPermission
 
 
 class SpeakerList(EventPermissionRequired, Sortable, Filterable, ListView):
@@ -52,7 +54,7 @@ class SpeakerList(EventPermissionRequired, Sortable, Filterable, ListView):
                 accepted_submission_count=Count(
                     "user__submissions",
                     filter=Q(user__submissions__event=self.request.event)
-                    & Q(user__submissions__state__in=["accepted", "confirmed"]),
+                           & Q(user__submissions__state__in=["accepted", "confirmed"]),
                 ),
             )
         )
@@ -269,7 +271,7 @@ class TourListView(EventPermissionRequired, Sortable, Filterable, ListView):
 
     def get_queryset(self):
         qs = Tour.objects.filter(event__slug=self.request.event.slug)
-        qs = self.filter_queryset(qs)
+        qs = self.filter_queryset(qs).order_by('departure_time')
         return qs
 
 
@@ -320,3 +322,14 @@ class TourDeleteView(EventPermissionRequired, DeleteView):
                 "event": self.request.event.slug
             },
         )
+
+
+class ShuttleView(View):
+    def get(self, request, **kwargs):
+        if request.user.teams.filter(name='shuttle').exists():
+            return render(request, 'pretalx_hitalx/tours_export.html', {
+                'tours': Tour.objects.filter(event=request.event)
+            })
+        else:
+            messages.warning(request, ugettext('Only people in the team \'shuttle\' can access this page'))
+            return redirect(reverse('orga:event.login', kwargs={'event': request.event.slug}))

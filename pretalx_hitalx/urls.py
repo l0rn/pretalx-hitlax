@@ -8,7 +8,8 @@ from .views import (
     SpeakerTourManagement,
     TourListView,
     TourDetailView,
-    TourDeleteView
+    TourDeleteView,
+    ShuttleView
 )
 
 urlpatterns = [
@@ -36,6 +37,11 @@ urlpatterns = [
         "orga/event/<slug:event>/tours/<int:pk>/delete",
         view=TourDeleteView.as_view(),
         name="tour.delete",
+    ),
+    path(
+        "orga/event/<slug:event>/tours/export",
+        view=ShuttleView.as_view(),
+        name="tours.export",
     ),
     path(
         "orga/event/<slug:event>/tours/new",

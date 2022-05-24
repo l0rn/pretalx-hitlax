@@ -28,6 +28,14 @@ def navbar_info(sender, request, **kwargs):
                 'event': request.event.slug,
             }),
             'active': url.namespace == 'plugins:pretalx_hitalx' and url.url_name == 'tours.view',
+        },
+        {
+            'label': _('Tours export'),
+            'icon': 'bus',
+            'url': reverse('plugins:pretalx_hitalx:tours.export', kwargs={
+                'event': request.event.slug,
+            }),
+            'active': url.namespace == 'plugins:pretalx_hitalx' and url.url_name == 'tours.export',
         }
     ]
 
