@@ -23,7 +23,7 @@ from pretalx.person.models import SpeakerProfile
 from pretalx.submission.models import Answer, SubmissionStates
 
 from .form import SpeakerExpenseForm, SpeakerToursForm, TourForm
-from .models import ExpenseItem, Tour, TourPermission
+from .models import ExpenseItem, Tour
 
 
 class SpeakerList(EventPermissionRequired, Sortable, Filterable, ListView):
