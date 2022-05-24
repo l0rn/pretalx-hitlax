@@ -328,7 +328,7 @@ class ShuttleView(View):
     def get(self, request, **kwargs):
         if request.user.teams.filter(name='shuttle').exists():
             return render(request, 'pretalx_hitalx/tours_export.html', {
-                'tours': Tour.objects.filter(event=request.event)
+                'tours': Tour.objects.filter(event=request.event).order_by('departure_time')
             })
         else:
             messages.warning(request, ugettext('Only people in the team \'shuttle\' can access this page'))
