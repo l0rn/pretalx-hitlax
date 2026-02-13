@@ -1,7 +1,7 @@
 # Register your receivers here
 from django.dispatch import receiver
 from django.urls import resolve, reverse
-from django.utils.translation import ugettext as _
+from django.utils.translation import gettext as _
 from pretalx.common.signals import activitylog_display
 from pretalx.orga.signals import nav_event
 

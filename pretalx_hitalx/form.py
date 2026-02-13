@@ -2,7 +2,7 @@ from django import forms
 from django.forms import CharField, ModelForm
 from django_scopes.forms import SafeModelMultipleChoiceField
 from django_scopes import scope
-from pretalx.common.mixins.forms import ReadOnlyFlag
+from pretalx.common.forms.mixins import ReadOnlyFlag
 from pretalx.event.models import Event
 from pretalx.person.models import SpeakerProfile
 

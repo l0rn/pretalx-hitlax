@@ -4,11 +4,12 @@ from django.contrib import messages
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import Count, Exists, OuterRef, Q
 from django.http import HttpResponseRedirect
-from django.shortcuts import reverse, get_object_or_404, render, redirect
-from django.utils.translation import ugettext
+from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse
+from django.utils.translation import gettext
 from django.views.generic import ListView, View, DeleteView
 from django_context_decorator import context
-from pretalx.common.mixins.views import (
+from pretalx.common.views.mixins import (
     ActionFromUrl,
     EventPermissionRequired,
     Filterable,
@@ -331,5 +332,5 @@ class ShuttleView(View):
                 'tours': Tour.objects.filter(event=request.event).order_by('departure_time')
             })
         else:
-            messages.warning(request, ugettext('Only people in the team \'shuttle\' can access this page'))
+            messages.warning(request, gettext('Only people in the team \'shuttle\' can access this page'))
             return redirect(reverse('orga:event.login', kwargs={'event': request.event.slug}))
