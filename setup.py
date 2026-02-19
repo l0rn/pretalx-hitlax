@@ -32,7 +32,9 @@ setup(
     author_email="j.zint@frykk.de",
     license="Apache Software License",
     install_requires=[
-        'django-autocomplete-light'
+        "django-autocomplete-light",
+        "django-scopes",
+        "django-context-decorator",
     ],
     packages=find_packages(exclude=["tests", "tests.*"]),
     include_package_data=True,

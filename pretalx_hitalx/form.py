@@ -1,13 +1,13 @@
 from django import forms
 from django.forms import CharField, ModelForm
+from django.utils.translation import gettext_lazy as _
 from django_scopes.forms import SafeModelMultipleChoiceField
 from django_scopes import scope
 from pretalx.common.forms.mixins import ReadOnlyFlag
 from pretalx.event.models import Event
 from pretalx.person.models import SpeakerProfile
 
-from .models import ExpenseItem
-from .models import Tour
+from .models import ExpenseItem, Tour
 
 
 class SpeakerExpenseForm(ReadOnlyFlag, ModelForm):
@@ -16,7 +16,8 @@ class SpeakerExpenseForm(ReadOnlyFlag, ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["speaker"].disabled = True
-        self.fields["paid"].disabled = True
+        if "paid" in self.fields:
+            self.fields["paid"].disabled = True
 
     class Meta:
         model = ExpenseItem
@@ -25,9 +26,11 @@ class SpeakerExpenseForm(ReadOnlyFlag, ModelForm):
 
 
 class SpeakerToursForm(ReadOnlyFlag, ModelForm):
-    tours = forms.ModelMultipleChoiceField(
-        queryset=Tour.objects.all().order_by('departure_time'),
+    label = _("Tours")
+    tours = SafeModelMultipleChoiceField(
+        queryset=Tour.objects.none(),
         widget=forms.SelectMultiple(attrs={"class": "select2"}),
+        required=False,
     )
 
     def save(self, *args, **kwargs):
@@ -36,15 +39,20 @@ class SpeakerToursForm(ReadOnlyFlag, ModelForm):
             instance.tours.set(self.cleaned_data["tours"])
 
     def __init__(self, *args, **kwargs):
-        super(SpeakerToursForm, self).__init__(*args, **kwargs)
-        self.initial['tours'] = kwargs['instance'].tours.all()
+        event = kwargs.pop("event", None)
+        super().__init__(*args, **kwargs)
+        if not event and self.instance.pk:
+            event = self.instance.event
+
+        if event:
+            self.fields["tours"].queryset = Tour.objects.filter(event=event).order_by("departure_time")
+
+        if self.instance.pk:
+            self.initial["tours"] = self.instance.tours.all()
 
     class Meta:
         model = SpeakerProfile
         fields = ["tours"]
-        field_classes = {
-            "tours": SafeModelMultipleChoiceField,
-        }
 
 
 class PassengerChoiceField(forms.ModelMultipleChoiceField):
@@ -55,24 +63,39 @@ class PassengerChoiceField(forms.ModelMultipleChoiceField):
 class TourForm(ReadOnlyFlag, ModelForm):
     description = CharField()
     start_location = CharField()
-    departure_time = forms.DateTimeField()
+    departure_time = forms.DateTimeField(
+        widget=forms.DateTimeInput(attrs={"class": "datetimepickerfield"})
+    )
     passengers = PassengerChoiceField(
         queryset=SpeakerProfile.objects.none(),
         widget=forms.SelectMultiple(attrs={"class": "select2"}),
         blank=True,
-        required=False
+        required=False,
     )
 
-    def __init__(self, *args, user=None, locales=None, organiser=None, **kwargs):
+    def __init__(self, *args, **kwargs):
+        event = kwargs.pop("event", None)
         super().__init__(*args, **kwargs)
-        with scope(event=Event.objects.get(id=kwargs['initial'].get('event', None))):
-            self.fields["passengers"].queryset = SpeakerProfile.objects.all()
-        self.fields["departure_time"].widget.attrs["class"] = "datetimepickerfield"
+        if not event and "initial" in kwargs and "event" in kwargs["initial"]:
+            event = Event.objects.filter(id=kwargs["initial"]["event"]).first()
+
+        if event:
+            with scope(event=event):
+                self.fields["passengers"].queryset = SpeakerProfile.objects.all()
+
+        if "event" in self.fields:
+            self.fields["event"].widget = forms.HiddenInput()
 
     class Meta:
         model = Tour
-        fields = ["description", "departure_time", "start_location", "type", "event", "passengers"]
-        widgets = {'event': forms.HiddenInput(), 'passengers': forms.SelectMultiple()}
+        fields = [
+            "description",
+            "departure_time",
+            "start_location",
+            "type",
+            "event",
+            "passengers",
+        ]
         field_classes = {
             "passengers": SafeModelMultipleChoiceField,
         }

@@ -1,19 +1,17 @@
-{% extends "orga/cfp/base.html" %}
-{% load bootstrap4 %}
+{% extends "orga/base.html" %}
 {% load i18n %}
 {% load rules %}
-{% load url_replace %}
 {% load pretalx_hitalx %}
 
 {% block content %}
     <h2>
-        {{ page_obj.paginator.count }} {% translate 'Speakers' %}
+        {{ page_obj.paginator.count }} {% translate "Speakers" %}
     </h2>
 
     <div class="submit-group search-submit-group">
-        <form class="search-form">
-            {% bootstrap_form search_form %}
-            {% bootstrap_form filter_form %}
+        <form class="search-form" role="search">
+            {{ search_form }}
+            {{ filter_form }}
             <button class="btn btn-info btn-search" type="submit">{% translate "Search" %}</button>
         </form>
     </div>
@@ -31,15 +29,19 @@
                 <tr>
                     <td><a href="{{ profile.orga_urls.base }}">{{ profile.user.get_display_name }}</a></td>
                     <td>
-                        <a href="{% url "plugins:pretalx_hitalx:expenses.view" event=request.event.slug speaker_id=profile.user.id %}">{{ profile.user | paid_expenses | euro_amount }} / {{ profile.user | total_expenses | euro_amount }}</a>
+                        <a href="{% url "plugins:pretalx_hitalx:expenses.view" event=request.event.slug speaker_id=profile.user.id %}">
+                            {{ profile.user | paid_expenses | euro_amount }} / {{ profile.user | total_expenses | euro_amount }}
+                        </a>
                     </td>
                     <td>
-                        <a href="{% url "plugins:pretalx_hitalx:speaker_tours.view" event=request.event.slug pk=profile.id %}">{{ profile.tours.count }}</a>
+                        <a href="{% url "plugins:pretalx_hitalx:speaker_tours.view" event=request.event.slug pk=profile.id %}">
+                            {{ profile.tours.count }}
+                        </a>
                     </td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
-    {% include "orga/pagination.html" %}
+    {% include "orga/includes/pagination.html" %}
 {% endblock %}
