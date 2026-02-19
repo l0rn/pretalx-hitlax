@@ -1,8 +1,6 @@
-{% extends "orga/cfp/base.html" %}
-{% load bootstrap4 %}
+{% extends "orga/base.html" %}
 {% load i18n %}
 {% load rules %}
-{% load url_replace %}
 {% load pretalx_hitalx %}
 
 {% block content %}
@@ -32,7 +30,7 @@
             </thead>
             <tbody>
                 {% for expense in object_list %}
-                    {% has_perm 'orga.change_speaker' request.user speaker_profile as can_edit_speaker %}
+                    {% has_perm 'person.update_speakerprofile' request.user speaker_profile as can_edit_speaker %}
                     <tr>
                         <td><a
                             href="{% url 'plugins:pretalx_hitalx:expense.view' event=request.event.slug speaker_id=expense.speaker.id pk=expense.id %} ">{{ expense.description }}</a>
@@ -58,5 +56,5 @@
             </tbody>
         </table>
     </div>
-    {% include "orga/pagination.html" %}
+    {% include "orga/includes/pagination.html" %}
 {% endblock %}

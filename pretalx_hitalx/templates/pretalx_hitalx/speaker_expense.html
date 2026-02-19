@@ -1,6 +1,4 @@
-{% extends "orga/cfp/base.html" %}
-{% load bootstrap4 %}
-{% load compress %}
+{% extends "orga/base.html" %}
 {% load i18n %}
 {% load rules %}
 {% load static %}
@@ -14,8 +12,8 @@
     </h2>
     <form method="post">
         {% csrf_token %}
-        {% bootstrap_form_errors form %}
-        {% bootstrap_form form layout='event' %}
+        {% include "common/forms/errors.html" %}
+        {{ form }}
 
         <div class="submit-group panel">
             <span>
@@ -34,6 +32,6 @@
         {% if not log_entries %}
             <span>{% translate 'No activity log yet' %}</span>
         {% endif %}
-        {% include "orga/pagination.html" %}
+        {% include "orga/includes/pagination.html" %}
     </div>
 {% endblock %}
