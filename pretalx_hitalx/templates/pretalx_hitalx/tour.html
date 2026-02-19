@@ -5,27 +5,26 @@
 
 {% block title %}
   {% if form.instance.pk %}
-    {% translate 'Tour: ' %}{{ form.instance.description }}
+    {% translate "Tour: " %}{{ form.instance.description }}
   {% else %}
-    {% translate 'New Tour' %}
+    {% translate "New Tour" %}
   {% endif %}
 {% endblock %}
 {% block content %}
   <h2>
     {% if form.instance.pk %}
-      {% translate 'Tour: ' %}{{ form.instance.description }}
+      {% translate "Tour: " %}{{ form.instance.description }}
     {% else %}
-      {% translate 'New Tour' %}
+      {% translate "New Tour" %}
     {% endif %}
   </h2>
   <form method="post">
     {% csrf_token %}
     {% include "common/forms/errors.html" %}
-    {{ form }}
+    {{ form.as_p }}
 
     <div class="submit-group panel">
-      <span>
-      </span>
+      <span></span>
       <span>
         <button type="submit" class="btn btn-success btn-lg">
             <i class="fa fa-check"></i>

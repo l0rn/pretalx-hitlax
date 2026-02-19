@@ -22,4 +22,7 @@ def paid_expenses(user):
 
 @register.filter(name="euro_amount")
 def euro_amount(amount):
-    return f"{amount:.2f} €".replace(".", ",")
+    try:
+        return f"{amount:.2f} €".replace(".", ",")
+    except (TypeError, ValueError):
+        return "0,00 €"

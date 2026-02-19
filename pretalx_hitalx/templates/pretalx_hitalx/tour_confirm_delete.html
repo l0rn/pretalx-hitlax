@@ -7,7 +7,7 @@
     <form method="post">
         {% csrf_token %}
         <div class="submit-group">
-            <a href="{% url 'plugins:pretalx_hitalx:tours.view' event=request.event.slug %}" class="btn btn-lg btn-outline-info">
+            <a href="{% url "plugins:pretalx_hitalx:tours.view" event=request.event.slug %}" class="btn btn-lg btn-outline-info">
                 {% translate "Back" %}
             </a>
             <button type="submit" class="btn btn-lg btn-danger">

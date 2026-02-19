@@ -4,20 +4,19 @@
 {% load static %}
 
 {% block title %}
-    {% translate 'Expense for ' %}{{ form.instance.speaker.get_display_name }} ({{ form.instance.description }})
+    {% translate "Expense for " %}{{ form.instance.speaker.get_display_name }} ({{ form.instance.description }})
 {% endblock %}
 {% block content %}
     <h2>
-        {% translate 'Expense for ' %}{{ form.instance.speaker.get_display_name }} ({{ form.instance.description }})
+        {% translate "Expense for " %}{{ form.instance.speaker.get_display_name }} ({{ form.instance.description }})
     </h2>
     <form method="post">
         {% csrf_token %}
         {% include "common/forms/errors.html" %}
-        {{ form }}
+        {{ form.as_p }}
 
         <div class="submit-group panel">
-            <span>
-            </span>
+            <span></span>
             <span>
                 <button type="submit" class="btn btn-success btn-lg">
                     <i class="fa fa-check"></i>
@@ -27,11 +26,10 @@
         </div>
     </form>
     <div class="dashboard-history">
-        <h3>{% translate 'Activity Log' %}</h3>
+        <h3>{% translate "Activity Log" %}</h3>
         {% include "common/logs.html" with entries=log_entries hide_title=True %}
         {% if not log_entries %}
-            <span>{% translate 'No activity log yet' %}</span>
+            <span>{% translate "No activity log yet" %}</span>
         {% endif %}
-        {% include "orga/includes/pagination.html" %}
     </div>
 {% endblock %}

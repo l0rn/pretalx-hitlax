@@ -6,7 +6,7 @@ from django.db.models import Count, Exists, OuterRef, Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
-from django.utils.translation import gettext
+from django.utils.translation import gettext as _
 from django.views.generic import ListView, View, DeleteView
 from django_context_decorator import context
 from pretalx.common.views.mixins import (
@@ -38,7 +38,7 @@ class SpeakerList(EventPermissionRequired, Sortable, Filterable, ListView):
 
     @context
     def filter_form(self):
-        return SpeakerFilterForm(self.request.event, self.request.GET)
+        return SpeakerFilterForm(self.request.GET, event=self.request.event)
 
     def get_queryset(self):
         qs = (
@@ -54,55 +54,12 @@ class SpeakerList(EventPermissionRequired, Sortable, Filterable, ListView):
                 accepted_submission_count=Count(
                     "user__submissions",
                     filter=Q(user__submissions__event=self.request.event)
-                           & Q(user__submissions__state__in=["accepted", "confirmed"]),
+                    & Q(user__submissions__state__in=[SubmissionStates.ACCEPTED, SubmissionStates.CONFIRMED]),
                 ),
             )
         )
 
         qs = self.filter_queryset(qs)
-        if "role" in self.request.GET:
-            if self.request.GET["role"] == "true":
-                qs = qs.filter(
-                    user__submissions__in=self.request.event.submissions.filter(
-                        state__in=[
-                            SubmissionStates.ACCEPTED,
-                            SubmissionStates.CONFIRMED,
-                        ]
-                    )
-                )
-            elif self.request.GET["role"] == "false":
-                qs = qs.exclude(
-                    user__submissions__in=self.request.event.submissions.filter(
-                        state__in=[
-                            SubmissionStates.ACCEPTED,
-                            SubmissionStates.CONFIRMED,
-                        ]
-                    )
-                )
-
-        question = self.request.GET.get("question")
-        unanswered = self.request.GET.get("unanswered")
-        answer = self.request.GET.get("answer")
-        option = self.request.GET.get("answer__options")
-        if question and (answer or option):
-            if option:
-                answers = Answer.objects.filter(
-                    person_id=OuterRef("user_id"),
-                    question_id=question,
-                    options__pk=option,
-                )
-            else:
-                answers = Answer.objects.filter(
-                    person_id=OuterRef("user_id"),
-                    question_id=question,
-                    answer__exact=answer,
-                )
-            qs = qs.annotate(has_answer=Exists(answers)).filter(has_answer=True)
-        elif question and unanswered:
-            answers = Answer.objects.filter(
-                question_id=question, person_id=OuterRef("user_id")
-            )
-            qs = qs.annotate(has_answer=Exists(answers)).filter(has_answer=False)
         qs = qs.order_by("id").distinct()
         qs = self.sort_queryset(qs)
         return qs
@@ -111,13 +68,12 @@ class SpeakerList(EventPermissionRequired, Sortable, Filterable, ListView):
 class SpeakerExpenseList(EventPermissionRequired, ListView):
     model = ExpenseItem
     template_name = "pretalx_hitalx/speaker_expenses.html"
-    context_object_name = "speakers"
-    default_sort_field = "user__name"
+    context_object_name = "expenses"
     paginate_by = 25
-    permission_required = "person.orga_list_speakerprofile"
+    permission_required = "person.orga_view_speakerprofile"
 
     def get_queryset(self):
-        return super().get_queryset().filter(speaker_id=self.kwargs["speaker_id"])
+        return ExpenseItem.objects.filter(speaker_id=self.kwargs["speaker_id"])
 
     @context
     def speaker_profile(self):
@@ -144,20 +100,15 @@ class SpeakerExpenseDetail(PermissionRequired, CreateOrUpdateView):
         )
 
     def post(self, request, *args, **kwargs):
-        created = False if self.object else True
-        response = super(SpeakerExpenseDetail, self).post(request, *args, **kwargs)
-        self.object.event = request.event
-        if created:
+        created = not bool(self.object)
+        response = super().post(request, *args, **kwargs)
+        if self.object:
+            self.object.event = request.event
+            action = "pretalx_hitalx.expense_item.create" if created else "pretalx_hitalx.expense_item.edit"
             self.object.log_action(
-                "pretalx_hitalx.expense_item.create",
+                action,
                 person=request.user,
-                data={"amount": self.object.amount, "notes": self.object.notes},
-            )
-        else:
-            self.object.log_action(
-                "pretalx_hitalx.expense_item.edit",
-                person=request.user,
-                data={"amount": self.object.amount, "notes": self.object.notes},
+                data={"amount": str(self.object.amount), "notes": self.object.notes},
             )
         return response
 
@@ -166,9 +117,6 @@ class SpeakerExpenseDetail(PermissionRequired, CreateOrUpdateView):
         return SpeakerProfile.objects.filter(
             user=self.kwargs["speaker_id"], event=self.request.event
         ).first()
-
-    def get_permission_object(self):
-        return self.permission_object
 
     def get_object(self):
         return ExpenseItem.objects.filter(pk=self.kwargs.get("pk")).first()
@@ -194,22 +142,11 @@ class SpeakerExpenseDetail(PermissionRequired, CreateOrUpdateView):
                 content_type=ContentType.objects.get_for_model(ExpenseItem),
                 object_id=self.object.id,
             )
-        else:
-            return []
+        return []
 
 
 class MarkExpenseView(PermissionRequired, View):
-    model = ExpenseItem
-    context_object_name = "expense_item"
-    permission_required = "person.orga_view_speakerprofile"
-    write_permission_required = "person.update_speakerprofile"
-
-    def get_object(self):
-        return self.object
-
-    @cached_property
-    def object(self):
-        return ExpenseItem.objects.filter(pk=self.kwargs.get("pk")).first()
+    permission_required = "person.update_speakerprofile"
 
     @property
     def permission_object(self):
@@ -217,48 +154,35 @@ class MarkExpenseView(PermissionRequired, View):
             user=self.kwargs["speaker_id"], event=self.request.event
         ).first()
 
-    def get_permission_object(self):
-        return self.permission_object
-
     def post(self, request, *args, **kwargs):
-        obj = self.get_object()
+        obj = get_object_or_404(ExpenseItem, pk=self.kwargs.get("pk"))
         paid = request.POST.get("paid", False) == "true"
         obj.paid = paid
         obj.save()
-        self.object.event = request.event
         obj.log_action(
             "pretalx_hitalx.expense_item.mark",
             person=request.user,
-            data={"paid": self.object.paid},
+            data={"paid": obj.paid},
         )
-        referer = request.META.get("HTTP_REFERER", None)
-        if referer:
-            return HttpResponseRedirect(referer)
-        else:
-            return HttpResponseRedirect(
-                reverse(
-                    "plugins:pretalx_hitalx:expenses.view",
-                    kwargs={
-                        "event": self.request.event.slug,
-                        "speaker_id": self.kwargs["speaker_id"],
-                    },
-                )
-            )
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER") or reverse(
+            "plugins:pretalx_hitalx:expenses.view",
+            kwargs={
+                "event": request.event.slug,
+                "speaker_id": self.kwargs["speaker_id"],
+            },
+        ))
 
 
 class SpeakerTourManagement(PermissionRequired, CreateOrUpdateView):
     template_name = "pretalx_hitalx/speaker_tours.html"
     form_class = SpeakerToursForm
     model = SpeakerProfile
-    permission_required = "person.orga_view_speakerprofile"
-    write_permission_required = "person.update_speakerprofile"
+    permission_required = "person.update_speakerprofile"
 
     def get_success_url(self) -> str:
         return reverse(
             "plugins:pretalx_hitalx:speakers_by_expense.view",
-            kwargs={
-                "event": self.request.event.slug
-            },
+            kwargs={"event": self.request.event.slug},
         )
 
 
@@ -266,20 +190,20 @@ class TourListView(EventPermissionRequired, Sortable, Filterable, ListView):
     template_name = "pretalx_hitalx/tours.html"
     model = Tour
     context_object_name = "tours"
-    filter_fields = ['type']
-    permission_required = "person.orga_view_speakerprofile"
+    filter_fields = ["type"]
+    permission_required = "person.orga_list_speakerprofile"
 
     def get_queryset(self):
-        qs = Tour.objects.filter(event__slug=self.request.event.slug)
-        qs = self.filter_queryset(qs).order_by('departure_time')
+        qs = Tour.objects.filter(event=self.request.event)
+        qs = self.filter_queryset(qs).order_by("departure_time")
         return qs
 
 
-class TourDetailView(EventPermissionRequired, Sortable, CreateOrUpdateView):
+class TourDetailView(EventPermissionRequired, CreateOrUpdateView):
     template_name = "pretalx_hitalx/tour.html"
     model = Tour
     form_class = TourForm
-    permission_required = "person.orga_view_speakerprofile"
+    permission_required = "person.update_speakerprofile"
 
     def get_form(self, form_class=None):
         if form_class is None:
@@ -287,12 +211,13 @@ class TourDetailView(EventPermissionRequired, Sortable, CreateOrUpdateView):
         return form_class(
             **{
                 **self.get_form_kwargs(),
-                "initial": {"event": Event.objects.filter(slug=self.kwargs["event"]).first().id},
+                "event": self.request.event,
+                "initial": {"event": self.request.event.id},
             }
         )
 
     def get_object(self):
-        return Tour.objects.filter(pk=self.kwargs.get("pk")).first()
+        return Tour.objects.filter(pk=self.kwargs.get("pk"), event=self.request.event).first()
 
     @cached_property
     def object(self):
@@ -301,35 +226,30 @@ class TourDetailView(EventPermissionRequired, Sortable, CreateOrUpdateView):
     def get_success_url(self) -> str:
         return reverse(
             "plugins:pretalx_hitalx:tours.view",
-            kwargs={
-                "event": self.request.event.slug
-            },
+            kwargs={"event": self.request.event.slug},
         )
 
 
 class TourDeleteView(EventPermissionRequired, DeleteView):
-    permission_required = "person.orga_view_speakerprofile"
+    permission_required = "person.update_speakerprofile"
 
     def get_object(self):
-        return get_object_or_404(
-            Tour.objects.all(), event=self.request.event, pk=self.kwargs.get("pk")
-        )
+        return get_object_or_404(Tour, event=self.request.event, pk=self.kwargs.get("pk"))
 
     def get_success_url(self) -> str:
         return reverse(
             "plugins:pretalx_hitalx:tours.view",
-            kwargs={
-                "event": self.request.event.slug
-            },
+            kwargs={"event": self.request.event.slug},
         )
 
 
-class ShuttleView(View):
+class ShuttleView(EventPermissionRequired, View):
+    permission_required = "person.orga_list_speakerprofile"
+
     def get(self, request, **kwargs):
-        if request.user.teams.filter(name='shuttle').exists():
-            return render(request, 'pretalx_hitalx/tours_export.html', {
-                'tours': Tour.objects.filter(event=request.event).order_by('departure_time')
+        if request.user.teams.filter(name__iexact="shuttle").exists() or request.user.is_administrator:
+            return render(request, "pretalx_hitalx/tours_export.html", {
+                "tours": Tour.objects.filter(event=request.event).order_by("departure_time")
             })
-        else:
-            messages.warning(request, gettext('Only people in the team \'shuttle\' can access this page'))
-            return redirect(reverse('orga:event.login', kwargs={'event': request.event.slug}))
+        messages.warning(request, _("Only people in the team 'shuttle' can access this page"))
+        return redirect(reverse("orga:event.dashboard", kwargs={"event": request.event.slug}))
