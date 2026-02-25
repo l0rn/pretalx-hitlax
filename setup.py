@@ -13,7 +13,7 @@ except FileNotFoundError:
 
 setup(
     name="pretalx-hitalx",
-    version="0.0.11",
+    version="0.0.12",
     description="Some utilities specifically for the Hedonist International",
     long_description=long_description,
     url="https://github.com/l0rn/pretalx-hitlax",

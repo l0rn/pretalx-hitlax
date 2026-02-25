@@ -61,3 +61,6 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+
+# Keep plugin translation binaries in git for pip installs
+!pretalx_hitalx/locale/**/*.mo
