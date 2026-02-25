@@ -3,7 +3,6 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -19,11 +18,11 @@ msgstr ""
 
 #: pretalx-hitalx/pretalx_hitalx/apps.py:10
 msgid "Pretalx Hitalx"
-msgstr ""
+msgstr "Pretalx Hitalx"
 
 #: pretalx-hitalx/pretalx_hitalx/apps.py:13
 msgid "Various features specifically for the Hedonist International"
-msgstr "Diverse Features für die Hedonistische Internationalse"
+msgstr "Verschiedene Funktionen speziell für die Hedonist International."
 
 #: pretalx-hitalx/pretalx_hitalx/models.py:16
 msgid "Shuttle"
@@ -38,10 +37,9 @@ msgid "Reference URL"
 msgstr "Referenz URL"
 
 #: pretalx-hitalx/pretalx_hitalx/signals.py:14
-#, fuzzy
 #| msgid "Add a new expense"
 msgid "Speaker expenses"
-msgstr "Ausgaben für Speaker"
+msgstr "Speaker-Ausgaben"
 
 #: pretalx-hitalx/pretalx_hitalx/signals.py:25
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:26
@@ -74,11 +72,11 @@ msgstr "Speichern"
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:32
 msgid "Activity Log"
-msgstr "Bearbeitungs Log"
+msgstr "Aktivitätsprotokoll"
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expense.html:35
 msgid "No activity log yet"
-msgstr "Keine Einträge bisher"
+msgstr "Noch keine Aktivitäten"
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speaker_expenses.html:10
 msgid "Expenses for "
@@ -114,10 +112,9 @@ msgid "Tours of "
 msgstr "Fahrten von"
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:10
-#, fuzzy
 #| msgid "Add a new expense"
 msgid "Speakers"
-msgstr "Ausgaben für Speaker"
+msgstr "Speaker"
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/speakers.html:17
 msgid "Search"
@@ -158,10 +155,9 @@ msgid "Filter"
 msgstr "Filter"
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:24
-#, fuzzy
 #| msgid "Add a new expense"
 msgid "Add a new Tour"
-msgstr "Neue Ausgabe hinzufügen"
+msgstr "Neue Fahrt hinzufügen"
 
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:32
 msgid "Type"
@@ -186,3 +182,18 @@ msgstr "Editieren"
 #: pretalx-hitalx/pretalx_hitalx/templates/pretalx_hitalx/tours.html:60
 msgid "Delete"
 msgstr "Löschen"
+
+msgid "Tours export"
+msgstr "Fahrten-Export"
+
+msgid "Expenses"
+msgstr "Ausgaben"
+
+msgid "Reference (URL)"
+msgstr "Referenz (URL)"
+
+msgid "Notes"
+msgstr "Notizen"
+
+msgid "Add expense"
+msgstr "Ausgabe hinzufügen"

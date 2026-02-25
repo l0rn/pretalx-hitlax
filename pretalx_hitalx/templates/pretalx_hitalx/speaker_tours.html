@@ -1,6 +1,4 @@
-{% extends "orga/cfp/base.html" %}
-{% load bootstrap4 %}
-{% load compress %}
+{% extends "orga/base.html" %}
 {% load i18n %}
 {% load rules %}
 {% load static %}
@@ -13,8 +11,8 @@
     </h2>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {% bootstrap_form_errors form %}
-        {% bootstrap_form form layout='event' %}
+        {{ form.non_field_errors }}
+        {{ form.as_p }}
         <div class="submit-group panel">
             <span>
             </span>

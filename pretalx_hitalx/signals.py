@@ -1,9 +1,10 @@
 # Register your receivers here
 from django.dispatch import receiver
 from django.urls import resolve, reverse
+from django_scopes import scope
 from django.utils.translation import gettext as _
 from pretalx.common.signals import activitylog_display
-from pretalx.orga.signals import nav_event
+from pretalx.orga.signals import nav_event, speaker_form
 
 
 @receiver(nav_event, dispatch_uid="hitalx_nav")
@@ -52,3 +53,33 @@ def default_activitylog_display(sender, activitylog, **kwargs):
     if activitylog.action_type in PLUGIN_ACTION_TYPES:
         return f"{PLUGIN_ACTION_TYPES[activitylog.action_type]} ({activitylog.data})"
 
+
+
+from .form import SpeakerExpensesInlineForm, SpeakerToursForm
+
+
+
+@receiver(speaker_form, dispatch_uid="hitalx_speaker_inline_forms")
+def speaker_inline_forms(sender, request, instance, **kwargs):
+    if not instance:
+        return []
+
+    # Current pretalx speaker form passes a User instance here.
+    user = getattr(instance, "user", None) and instance.user or instance
+    profile = getattr(instance, "event", None) and instance or user.event_profile(sender)
+    data = request.POST if request.method == "POST" else None
+
+    with scope(event=sender):
+        return [
+            SpeakerExpensesInlineForm(
+                data=data,
+                prefix="hitalx_expense_inline",
+                speaker=user,
+                event=sender,
+            ),
+            SpeakerToursForm(
+                data=data,
+                instance=profile,
+                prefix="hitalx_tours_inline",
+            ),
+        ]

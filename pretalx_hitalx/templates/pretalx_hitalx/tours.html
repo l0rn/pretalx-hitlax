@@ -1,8 +1,6 @@
-{% extends "orga/cfp/base.html" %}
-{% load bootstrap4 %}
+{% extends "orga/base.html" %}
 {% load i18n %}
 {% load rules %}
-{% load url_replace %}
 {% load pretalx_hitalx %}
 
 {% block content %}
@@ -15,7 +13,7 @@
 
   <div class="submit-group">
     <form class="search-form" style="width: auto;">
-      {% bootstrap_form filter_form %}
+      {{ filter_form.as_p }}
       <button class="btn btn-info btn-search" type="submit">{% translate "Filter" %}</button>
     </form>
     <span>
@@ -66,5 +64,5 @@
       </tbody>
     </table>
   </div>
-  {% include "orga/pagination.html" %}
+  {% include "orga/includes/pagination.html" %}
 {% endblock %}

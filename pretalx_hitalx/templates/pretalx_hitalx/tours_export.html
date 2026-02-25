@@ -4,5 +4,5 @@
     <h2>{{ tour.departure_time }} - {{ tour.description }}</h2>
     <span>Time: {{ tour.departure_time }}</span><br />
     <span>Location: {{ tour.start_location }}</span><br />
-    <span>Passengers: {% for passenger in tour.passengers.all %}{{ passenger.user.get_display_name }}{% endfor %}</span>
+    <span>Passengers: {% for passenger in tour.passengers.all %}{{ passenger.user.get_display_name }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
 {% endfor %}

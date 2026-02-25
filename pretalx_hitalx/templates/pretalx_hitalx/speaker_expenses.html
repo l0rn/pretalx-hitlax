@@ -1,8 +1,6 @@
-{% extends "orga/cfp/base.html" %}
-{% load bootstrap4 %}
+{% extends "orga/base.html" %}
 {% load i18n %}
 {% load rules %}
-{% load url_replace %}
 {% load pretalx_hitalx %}
 
 {% block content %}
@@ -58,5 +56,5 @@
             </tbody>
         </table>
     </div>
-    {% include "orga/pagination.html" %}
+    {% include "orga/includes/pagination.html" %}
 {% endblock %}

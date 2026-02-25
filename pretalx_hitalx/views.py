@@ -8,44 +8,37 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.utils.translation import gettext
 from django.views.generic import ListView, View, DeleteView
-from django_context_decorator import context
 from pretalx.common.views.mixins import (
-    ActionFromUrl,
     EventPermissionRequired,
     Filterable,
     PermissionRequired,
-    Sortable,
 )
 from pretalx.common.models import ActivityLog
-from pretalx.common.views import CreateOrUpdateView
+from pretalx.common.views.generic import CreateOrUpdateView
 from pretalx.event.models import Event
 from pretalx.person.forms import SpeakerFilterForm
 from pretalx.person.models import SpeakerProfile
 from pretalx.submission.models import Answer, SubmissionStates
+from pretalx.submission.rules import speaker_profiles_for_user
 
 from .form import SpeakerExpenseForm, SpeakerToursForm, TourForm
 from .models import ExpenseItem, Tour
 
 
-class SpeakerList(EventPermissionRequired, Sortable, Filterable, ListView):
+class SpeakerList(EventPermissionRequired, Filterable, ListView):
     model = SpeakerProfile
     template_name = "pretalx_hitalx/speakers.html"
     context_object_name = "speakers"
     default_filters = ("user__email__icontains", "user__name__icontains")
-    sortable_fields = ("user__email", "user__name")
-    default_sort_field = "user__name"
     paginate_by = 25
-    permission_required = "orga.view_speakers"
+    permission_required = "person.orga_list_speakerprofile"
 
-    @context
-    def filter_form(self):
-        return SpeakerFilterForm(self.request.event, self.request.GET)
+    def get_filter_form(self):
+        return SpeakerFilterForm(self.request.GET, event=self.request.event)
 
     def get_queryset(self):
         qs = (
-            SpeakerProfile.objects.filter(
-                event=self.request.event, user__in=self.request.event.submitters
-            )
+            speaker_profiles_for_user(self.request.event, self.request.user)
             .select_related("event", "user")
             .annotate(
                 submission_count=Count(
@@ -105,7 +98,6 @@ class SpeakerList(EventPermissionRequired, Sortable, Filterable, ListView):
             )
             qs = qs.annotate(has_answer=Exists(answers)).filter(has_answer=False)
         qs = qs.order_by("id").distinct()
-        qs = self.sort_queryset(qs)
         return qs
 
 
@@ -113,26 +105,26 @@ class SpeakerExpenseList(EventPermissionRequired, ListView):
     model = ExpenseItem
     template_name = "pretalx_hitalx/speaker_expenses.html"
     context_object_name = "speakers"
-    default_sort_field = "user__name"
     paginate_by = 25
-    permission_required = "orga.view_speakers"
+    permission_required = "person.orga_list_speakerprofile"
 
     def get_queryset(self):
         return super().get_queryset().filter(speaker_id=self.kwargs["speaker_id"])
 
-    @context
-    def speaker_profile(self):
-        return SpeakerProfile.objects.filter(
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["speaker_profile"] = SpeakerProfile.objects.filter(
             user=self.kwargs["speaker_id"], event=self.request.event
         ).first()
+        return context
 
 
-class SpeakerExpenseDetail(PermissionRequired, ActionFromUrl, CreateOrUpdateView):
+class SpeakerExpenseDetail(PermissionRequired, CreateOrUpdateView):
     model = ExpenseItem
     form_class = SpeakerExpenseForm
     template_name = "pretalx_hitalx/speaker_expense.html"
-    permission_required = "orga.view_speaker"
-    write_permission_required = "orga.change_speaker"
+    permission_required = "person.orga_view_speakerprofile"
+    write_permission_required = "person.update_speakerprofile"
 
     def get_form(self, form_class=None):
         if form_class is None:
@@ -152,13 +144,13 @@ class SpeakerExpenseDetail(PermissionRequired, ActionFromUrl, CreateOrUpdateView
             self.object.log_action(
                 "pretalx_hitalx.expense_item.create",
                 person=request.user,
-                data={"amount": self.object.amount, "notes": self.object.notes},
+                data={"amount": str(self.object.amount), "notes": self.object.notes},
             )
         else:
             self.object.log_action(
                 "pretalx_hitalx.expense_item.edit",
                 person=request.user,
-                data={"amount": self.object.amount, "notes": self.object.notes},
+                data={"amount": str(self.object.amount), "notes": self.object.notes},
             )
         return response
 
@@ -187,23 +179,24 @@ class SpeakerExpenseDetail(PermissionRequired, ActionFromUrl, CreateOrUpdateView
             },
         )
 
-    @context
-    def log_entries(self, **kwargs):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         if self.object:
-            return ActivityLog.objects.filter(
+            context["log_entries"] = ActivityLog.objects.filter(
                 event=self.request.event,
                 content_type=ContentType.objects.get_for_model(ExpenseItem),
                 object_id=self.object.id,
             )
         else:
-            return []
+            context["log_entries"] = []
+        return context
 
 
 class MarkExpenseView(PermissionRequired, View):
     model = ExpenseItem
     context_object_name = "expense_item"
-    permission_required = "orga.view_speaker"
-    write_permission_required = "orga.change_speaker"
+    permission_required = "person.orga_view_speakerprofile"
+    write_permission_required = "person.update_speakerprofile"
 
     def get_object(self):
         return self.object
@@ -247,12 +240,12 @@ class MarkExpenseView(PermissionRequired, View):
             )
 
 
-class SpeakerTourManagement(PermissionRequired, ActionFromUrl, CreateOrUpdateView):
+class SpeakerTourManagement(PermissionRequired, CreateOrUpdateView):
     template_name = "pretalx_hitalx/speaker_tours.html"
     form_class = SpeakerToursForm
     model = SpeakerProfile
-    permission_required = "orga.view_speaker"
-    write_permission_required = "orga.change_speaker"
+    permission_required = "person.orga_view_speakerprofile"
+    write_permission_required = "person.update_speakerprofile"
 
     def get_success_url(self) -> str:
         return reverse(
@@ -263,12 +256,12 @@ class SpeakerTourManagement(PermissionRequired, ActionFromUrl, CreateOrUpdateVie
         )
 
 
-class TourListView(EventPermissionRequired, Sortable, Filterable, ListView):
+class TourListView(EventPermissionRequired, Filterable, ListView):
     template_name = "pretalx_hitalx/tours.html"
     model = Tour
     context_object_name = "tours"
     filter_fields = ['type']
-    permission_required = "orga.view_speaker"
+    permission_required = "person.orga_view_speakerprofile"
 
     def get_queryset(self):
         qs = Tour.objects.filter(event__slug=self.request.event.slug)
@@ -276,11 +269,11 @@ class TourListView(EventPermissionRequired, Sortable, Filterable, ListView):
         return qs
 
 
-class TourDetailView(EventPermissionRequired, Sortable, CreateOrUpdateView):
+class TourDetailView(EventPermissionRequired, CreateOrUpdateView):
     template_name = "pretalx_hitalx/tour.html"
     model = Tour
     form_class = TourForm
-    permission_required = "orga.view_speaker"
+    permission_required = "person.orga_view_speakerprofile"
 
     def get_form(self, form_class=None):
         if form_class is None:
@@ -309,7 +302,7 @@ class TourDetailView(EventPermissionRequired, Sortable, CreateOrUpdateView):
 
 
 class TourDeleteView(EventPermissionRequired, DeleteView):
-    permission_required = "orga.view_speaker"
+    permission_required = "person.orga_view_speakerprofile"
 
     def get_object(self):
         return get_object_or_404(

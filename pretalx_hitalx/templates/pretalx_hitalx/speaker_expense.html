@@ -1,6 +1,4 @@
-{% extends "orga/cfp/base.html" %}
-{% load bootstrap4 %}
-{% load compress %}
+{% extends "orga/base.html" %}
 {% load i18n %}
 {% load rules %}
 {% load static %}
@@ -14,12 +12,28 @@
     </h2>
     <form method="post">
         {% csrf_token %}
-        {% bootstrap_form_errors form %}
-        {% bootstrap_form form layout='event' %}
+        {{ form.non_field_errors }}
+
+        {{ form.speaker.as_field_group }}
+        {{ form.description.as_field_group }}
+
+        <div class="form-group row">
+            <label class="col-md-3 col-form-label" for="{{ form.amount.id_for_label }}">{{ form.amount.label }}</label>
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-text">€</span>
+                    {{ form.amount }}
+                </div>
+                {{ form.amount.errors }}
+            </div>
+        </div>
+
+        {{ form.paid.as_field_group }}
+        {{ form.reference.as_field_group }}
+        {{ form.notes.as_field_group }}
 
         <div class="submit-group panel">
-            <span>
-            </span>
+            <span></span>
             <span>
                 <button type="submit" class="btn btn-success btn-lg">
                     <i class="fa fa-check"></i>
@@ -34,6 +48,6 @@
         {% if not log_entries %}
             <span>{% translate 'No activity log yet' %}</span>
         {% endif %}
-        {% include "orga/pagination.html" %}
+        {% include "orga/includes/pagination.html" %}
     </div>
 {% endblock %}

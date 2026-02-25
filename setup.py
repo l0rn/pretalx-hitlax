@@ -1,7 +1,5 @@
 import os
-from distutils.command.build import build
 
-from django.core import management
 from setuptools import find_packages, setup
 
 try:
@@ -11,15 +9,6 @@ try:
         long_description = f.read()
 except FileNotFoundError:
     long_description = ""
-
-
-class CustomBuild(build):
-    def run(self):
-        management.call_command("compilemessages", verbosity=1)
-        build.run(self)
-
-
-cmdclass = {"build": CustomBuild}
 
 
 setup(
@@ -36,7 +25,6 @@ setup(
     ],
     packages=find_packages(exclude=["tests", "tests.*"]),
     include_package_data=True,
-    cmdclass=cmdclass,
     entry_points="""
 [pretalx.plugin]
 pretalx_hitalx=pretalx_hitalx:PretalxPluginMeta
