@@ -9,10 +9,16 @@ from .views import (
     TourListView,
     TourDetailView,
     TourDeleteView,
-    ShuttleView
+    ShuttleView,
+    ShuttleExportSettingsView
 )
 
 urlpatterns = [
+    path(
+        "orga/event/<slug:event>/settings/plugins/hitalx/shuttle-export/",
+        view=ShuttleExportSettingsView.as_view(),
+        name="tours.export.settings",
+    ),
     path(
         "orga/event/<slug:event>/speakers-by-expense/",
         view=SpeakerList.as_view(),

@@ -181,3 +181,11 @@ class SpeakerExpensesInlineForm:
     def __str__(self):
         return str(self._render_table())
 
+
+
+class ShuttleExportPermissionForm(forms.Form):
+    team_names = forms.CharField(
+        label=_("Allowed teams"),
+        help_text=_("Comma-separated team names that may access the tours export (e.g. shuttle, crew)."),
+        required=False,
+    )

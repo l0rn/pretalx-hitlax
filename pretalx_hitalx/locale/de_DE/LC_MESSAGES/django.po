@@ -197,3 +197,21 @@ msgstr "Notizen"
 
 msgid "Add expense"
 msgstr "Ausgabe hinzufügen"
+
+msgid "Shuttle export permissions"
+msgstr "Berechtigungen für Fahrten-Export"
+
+msgid "Configure which team names are allowed to access the tours export page."
+msgstr "Lege fest, welche Teamnamen auf die Fahrten-Exportseite zugreifen dürfen."
+
+msgid "Allowed teams"
+msgstr "Erlaubte Teams"
+
+msgid "Comma-separated team names that may access the tours export (e.g. shuttle, crew)."
+msgstr "Kommagetrennte Teamnamen mit Zugriff auf den Fahrten-Export (z. B. shuttle, crew)."
+
+msgid "Shuttle export permissions updated."
+msgstr "Berechtigungen für den Fahrten-Export wurden aktualisiert."
+
+msgid "You do not have permission to access this export."
+msgstr "Du hast keine Berechtigung, diesen Export aufzurufen."

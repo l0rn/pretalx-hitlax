@@ -4,7 +4,7 @@ from django.urls import resolve, reverse
 from django_scopes import scope
 from django.utils.translation import gettext as _
 from pretalx.common.signals import activitylog_display
-from pretalx.orga.signals import nav_event, speaker_form
+from pretalx.orga.signals import nav_event, nav_event_settings, speaker_form
 
 
 @receiver(nav_event, dispatch_uid="hitalx_nav")
@@ -83,3 +83,12 @@ def speaker_inline_forms(sender, request, instance, **kwargs):
                 prefix="hitalx_tours_inline",
             ),
         ]
+
+
+@receiver(nav_event_settings, dispatch_uid="hitalx_nav_settings")
+def hitalx_settings_nav(sender, request, **kwargs):
+    return [{
+        "label": _("Shuttle export permissions"),
+        "url": reverse("plugins:pretalx_hitalx:tours.export.settings", kwargs={"event": request.event.slug}),
+        "active": request.path_info.endswith('/settings/plugins/hitalx/shuttle-export/'),
+    }]

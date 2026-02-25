@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.utils.translation import gettext
-from django.views.generic import ListView, View, DeleteView
+from django.views.generic import ListView, View, DeleteView, FormView
 from pretalx.common.views.mixins import (
     EventPermissionRequired,
     Filterable,
@@ -21,7 +21,7 @@ from pretalx.person.models import SpeakerProfile
 from pretalx.submission.models import Answer, SubmissionStates
 from pretalx.submission.rules import speaker_profiles_for_user
 
-from .form import SpeakerExpenseForm, SpeakerToursForm, TourForm
+from .form import SpeakerExpenseForm, SpeakerToursForm, TourForm, ShuttleExportPermissionForm
 from .models import ExpenseItem, Tour
 
 
@@ -316,6 +316,27 @@ class TourDeleteView(EventPermissionRequired, DeleteView):
                 "event": self.request.event.slug
             },
         )
+
+
+class ShuttleExportSettingsView(EventPermissionRequired, FormView):
+    template_name = "pretalx_hitalx/shuttle_export_settings.html"
+    form_class = ShuttleExportPermissionForm
+    permission_required = "event.update_event"
+
+    def get_initial(self):
+        value = self.request.event.settings.get("hitalx_shuttle_export_teams", "shuttle")
+        return {"team_names": value}
+
+    def form_valid(self, form):
+        raw = form.cleaned_data.get("team_names", "")
+        teams = [t.strip() for t in raw.split(",") if t.strip()]
+        value = ", ".join(teams)
+        self.request.event.settings.set("hitalx_shuttle_export_teams", value)
+        messages.success(self.request, gettext("Shuttle export permissions updated."))
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse("plugins:pretalx_hitalx:tours.export.settings", kwargs={"event": self.request.event.slug})
 
 
 class ShuttleView(View):
