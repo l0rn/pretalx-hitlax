@@ -158,7 +158,7 @@ def tag_statistics_charts(sender, request, **kwargs):
     # Wrapped in a flex row so the two cards sit side by side.
     # tag_stats.js will move #hitalx-tag-charts into #stats at runtime.
     return f"""
-<div id="hitalx-tag-charts" style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
+<div id="hitalx-tag-charts" style="display:flex; gap:1rem; flex-wrap:wrap;">
   <div class="card" style="flex:1; min-width:300px;">
     <div class="card-header">{label_all}</div>
     <div id="hitalx-tag-all-data" class="d-none" data-states="{all_data}"></div>
