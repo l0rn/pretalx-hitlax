@@ -215,3 +215,9 @@ msgstr "Berechtigungen für den Fahrten-Export wurden aktualisiert."
 
 msgid "You do not have permission to access this export."
 msgstr "Du hast keine Berechtigung, diesen Export aufzurufen."
+
+msgid "Proposals by tag (all submissions)"
+msgstr "Einreichungen nach Tag (alle)"
+
+msgid "Proposals by tag (accepted & confirmed)"
+msgstr "Einreichungen nach Tag (angenommen & bestätigt)"

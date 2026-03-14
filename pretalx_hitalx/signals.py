@@ -3,12 +3,12 @@ import json
 from collections import Counter
 
 from django.dispatch import receiver
+from django.templatetags.static import static
 from django.urls import resolve, reverse
 from django_scopes import scope
 from django.utils.translation import gettext as _
-from django.utils.html import format_html
 from pretalx.common.signals import activitylog_display
-from pretalx.orga.signals import nav_event, nav_event_settings, speaker_form, html_below_orga_page
+from pretalx.orga.signals import nav_event, nav_event_settings, speaker_form, html_below_orga_page, html_head
 from pretalx.submission.models import SubmissionStates
 
 
@@ -99,11 +99,27 @@ def hitalx_settings_nav(sender, request, **kwargs):
     }]
 
 
+def _is_stats_page(request):
+    try:
+        url = resolve(request.path_info)
+        return url.namespace == "orga" and url.url_name == "submissions.statistics"
+    except Exception:
+        return False
+
+
+@receiver(html_head, dispatch_uid="hitalx_tag_statistics_head")
+def tag_statistics_head(sender, request, **kwargs):
+    """Inject the tag_stats.js deferred script only on the statistics page."""
+    if not _is_stats_page(request):
+        return ""
+    js_url = static("pretalx_hitalx/tag_stats.js")
+    return f'<script defer src="{js_url}"></script>'
+
+
 @receiver(html_below_orga_page, dispatch_uid="hitalx_tag_statistics")
 def tag_statistics_charts(sender, request, **kwargs):
-    """Inject tag distribution pie charts on the submissions statistics page."""
-    url = resolve(request.path_info)
-    if url.namespace != "orga" or url.url_name != "submissions.statistics":
+    """Inject tag distribution chart cards on the submissions statistics page."""
+    if not _is_stats_page(request):
         return ""
 
     event = request.event
@@ -128,78 +144,30 @@ def tag_statistics_charts(sender, request, **kwargs):
             for tag in sub.tags.all():
                 if tag.id in tag_ids:
                     counter[tag_ids[tag.id]] += 1
-        # Include tags with 0 count so all tags show up
-        result = [{"label": t.tag, "value": counter.get(t.tag, 0)} for t in tags]
-        return result
+        return [{"label": t.tag, "value": counter.get(t.tag, 0)} for t in tags]
 
-    all_data = json.dumps(count_by_tag(all_subs, tags))
-    accepted_data = json.dumps(count_by_tag(accepted_subs, tags))
+    def encode(data):
+        return json.dumps(data).replace('"', "&quot;")
 
+    all_data = encode(count_by_tag(all_subs, tags))
+    accepted_data = encode(count_by_tag(accepted_subs, tags))
+
+    label_all = _("Proposals by tag (all submissions)")
+    label_accepted = _("Proposals by tag (accepted & confirmed)")
+
+    # Wrapped in a flex row so the two cards sit side by side.
+    # tag_stats.js will move #hitalx-tag-charts into #stats at runtime.
     return f"""
-<div class="card mt-4">
-  <div class="card-header">{_("Proposals by tag (all submissions)")}</div>
-  <div id="hitalx-tag-all-data" class="d-none" data-states="{all_data.replace('"', '&quot;')}"></div>
-  <div id="hitalx-tag-all" class="pie card-body" style="min-height:300px"></div>
+<div id="hitalx-tag-charts" style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:1rem;">
+  <div class="card" style="flex:1; min-width:300px;">
+    <div class="card-header">{label_all}</div>
+    <div id="hitalx-tag-all-data" class="d-none" data-states="{all_data}"></div>
+    <div id="hitalx-tag-all" class="pie card-body" style="min-height:300px;"></div>
+  </div>
+  <div class="card" style="flex:1; min-width:300px;">
+    <div class="card-header">{label_accepted}</div>
+    <div id="hitalx-tag-accepted-data" class="d-none" data-states="{accepted_data}"></div>
+    <div id="hitalx-tag-accepted" class="pie card-body" style="min-height:300px;"></div>
+  </div>
 </div>
-<div class="card mt-4">
-  <div class="card-header">{_("Proposals by tag (accepted &amp; confirmed)")}</div>
-  <div id="hitalx-tag-accepted-data" class="d-none" data-states="{accepted_data.replace('"', '&quot;')}"></div>
-  <div id="hitalx-tag-accepted" class="pie card-body" style="min-height:300px"></div>
-</div>
-<script>
-(function() {{
-  function drawHitalxTagCharts() {{
-    if (typeof ApexCharts === 'undefined') {{
-      setTimeout(drawHitalxTagCharts, 50);
-      return;
-    }}
-    ['all', 'accepted'].forEach(function(scope) {{
-      var dataEl = document.getElementById('hitalx-tag-' + scope + '-data');
-      var chartEl = document.getElementById('hitalx-tag-' + scope);
-      if (!dataEl || !chartEl) return;
-      var data = JSON.parse(dataEl.dataset.states);
-      var series = data.map(function(e) {{ return e.value; }});
-      var labels = data.map(function(e) {{ return e.label; }});
-      var options = {{
-        series: series,
-        labels: labels,
-        chart: {{
-          width: chartEl.clientWidth - 50 || 500,
-          redrawOnParentResize: true,
-          type: 'donut',
-        }},
-        dataLabels: {{ enabled: false }},
-        legend: {{
-          formatter: function(val, opts) {{
-            if (val.length > 20) val = val.slice(0, 19) + '\u2026';
-            return val + ' - ' + opts.w.globals.series[opts.seriesIndex];
-          }}
-        }},
-        plotOptions: {{
-          pie: {{
-            donut: {{
-              labels: {{
-                show: true,
-                name: {{
-                  formatter: function(val) {{
-                    if (val.length < 16) return val;
-                    return val.slice(0, 15) + '\u2026';
-                  }}
-                }}
-              }}
-            }}
-          }}
-        }},
-        tooltip: {{ enabled: false }},
-        responsive: [{{
-          breakpoint: 480,
-          options: {{ chart: {{ width: 300 }}, legend: {{ position: 'bottom' }} }}
-        }}]
-      }};
-      new ApexCharts(chartEl, options).render();
-    }});
-  }}
-  window.addEventListener('load', drawHitalxTagCharts);
-}})();
-</script>
 """
