@@ -1,5 +1,5 @@
 /**
- * Pill / autocomplete widget for the tour passengers field.
+ * Pill / autocomplete widget for any <select multiple class="hitalx-pw-select">.
  *
  * Structure built on top of the hidden <select multiple>:
  *
@@ -10,9 +10,10 @@
  *     .hitalx-pw-pills               ← selected speakers as removable pills
  */
 (function () {
-  function init() {
-    var hiddenSelect = document.querySelector('.hitalx-passenger-select');
-    if (!hiddenSelect) return;
+  function initOne(hiddenSelect) {
+    // Guard against double-init
+    if (hiddenSelect.dataset.pwInit) return;
+    hiddenSelect.dataset.pwInit = '1';
 
     var allOptions = Array.from(hiddenSelect.options).map(function (o) {
       return { value: o.value, label: o.text };
@@ -33,7 +34,7 @@
     var searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.className = 'form-control';
-    searchInput.placeholder = 'Add speaker\u2026';
+    searchInput.placeholder = 'Add\u2026';
     searchInput.autocomplete = 'off';
     searchInput.spellcheck = false;
     inputRow.appendChild(searchInput);
@@ -164,9 +165,13 @@
     renderPills();
   }
 
+  function initAll() {
+    document.querySelectorAll('.hitalx-pw-select').forEach(initOne);
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initAll);
   } else {
-    init();
+    initAll();
   }
 })();

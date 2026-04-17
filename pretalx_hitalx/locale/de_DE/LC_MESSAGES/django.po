@@ -266,3 +266,12 @@ msgstr "Löschen"
 
 msgid "Some changes could not be saved."
 msgstr "Einige Änderungen konnten nicht gespeichert werden."
+
+msgid "Your expenses"
+msgstr "Deine Ausgaben"
+
+msgid "Your tours"
+msgstr "Deine Fahrten"
+
+msgid "Invalid selection"
+msgstr "Ungültige Auswahl"

@@ -77,8 +77,7 @@ class TourForm(ModelForm):
     passengers = PassengerChoiceField(
         queryset=SpeakerProfile.objects.none(),
         widget=forms.SelectMultiple(attrs={
-            "class": "form-control hitalx-passenger-select",
-            "size": "8",
+            "class": "hitalx-pw-select",
         }),
         blank=True,
         required=False,
@@ -102,40 +101,78 @@ class TourForm(ModelForm):
         }
 
 
-class SpeakerToursDisplay:
-    """Read-only display of a speaker's assigned tours, injected into the speaker detail page."""
+class SpeakerToursInlineForm:
+    """Editable pill-widget for assigning tours to a speaker on the admin speaker detail page."""
     label = _("Tours")
 
-    def __init__(self, *args, speaker=None, instance=None, data=None, prefix=None, **kwargs):
+    def __init__(self, *args, speaker=None, instance=None, data=None, prefix="hitalx_tours", **kwargs):
         self.profile = instance  # SpeakerProfile
+        self.prefix = prefix
+        self.data = data
+        self._errors = {}
+        self._is_valid = None
+        self._selected_ids = None  # None means "not yet parsed from POST"
+
+        self._all_tours = []
+        self._current_ids = set()
+        if self.profile:
+            with scope(event=self.profile.event):
+                self._all_tours = list(
+                    Tour.objects.filter(event=self.profile.event).order_by("departure_time")
+                )
+                self._current_ids = set(self.profile.tours.values_list("id", flat=True))
 
     def is_valid(self):
+        if self._is_valid is not None:
+            return self._is_valid
+        if self.data is None:
+            self._is_valid = True
+            return True
+        field_name = f"{self.prefix}-selected"
+        raw = self.data.getlist(field_name)
+        try:
+            self._selected_ids = [int(x) for x in raw if x]
+        except (ValueError, TypeError):
+            self._errors = {"tours": [str(_("Invalid selection"))]}
+            self._is_valid = False
+            return False
+        self._is_valid = True
         return True
 
     @property
     def errors(self):
-        return {}
+        return self._errors
 
     def save(self):
-        return None
+        if not self.profile or self._selected_ids is None:
+            return None
+        self.profile.tours.set(self._selected_ids)
+        return self.profile
 
     def _render(self):
         if not self.profile:
             return mark_safe('<p class="text-muted"><em>' + str(_("No tours assigned.")) + '</em></p>')
-        tours = list(self.profile.tours.all().order_by("departure_time"))
-        if not tours:
-            return mark_safe('<p class="text-muted"><em>' + str(_("No tours assigned.")) + '</em></p>')
-        items = "".join(
-            f"<li>{t.description} — {date_format(localtime(t.departure_time), format='SHORT_DATETIME_FORMAT')}</li>"
-            for t in tours
+
+        field_name = f"{self.prefix}-selected"
+        options = ""
+        for tour in self._all_tours:
+            when = date_format(localtime(tour.departure_time), format="SHORT_DATETIME_FORMAT")
+            label = f"{tour.description} — {when}"
+            sel = ' selected' if tour.id in self._current_ids else ''
+            options += f'<option value="{tour.id}"{sel}>{label}</option>'
+
+        html = (
+            '<link rel="stylesheet" href="/static/pretalx_hitalx/passengers_widget.css">'
+            f'<select multiple name="{field_name}" class="hitalx-pw-select">{options}</select>'
+            '<script defer src="/static/pretalx_hitalx/passengers_widget.js"></script>'
         )
-        return mark_safe(f'<ul class="list-unstyled mb-0">{items}</ul>')
+        return mark_safe(html)
 
     def __html__(self):
         return self._render()
 
     def __str__(self):
-        return self._render()
+        return str(self._render())
 
 
 

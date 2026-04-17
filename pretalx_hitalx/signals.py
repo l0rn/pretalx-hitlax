@@ -60,7 +60,7 @@ def default_activitylog_display(sender, activitylog, **kwargs):
 
 
 
-from .form import SpeakerExpensesInlineForm, SpeakerToursDisplay
+from .form import SpeakerExpensesInlineForm, SpeakerToursInlineForm
 
 
 
@@ -82,8 +82,10 @@ def speaker_inline_forms(sender, request, instance, **kwargs):
                 speaker=user,
                 event=sender,
             ),
-            SpeakerToursDisplay(
+            SpeakerToursInlineForm(
+                data=data,
                 instance=profile,
+                prefix="hitalx_tours",
             ),
         ]
 

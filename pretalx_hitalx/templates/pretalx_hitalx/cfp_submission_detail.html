@@ -1,0 +1,62 @@
+{% extends "cfp/event/user_submission_edit.html" %}
+{% load i18n %}
+
+{% block content %}
+{{ block.super }}
+
+{% if hitalx_my_expenses or hitalx_my_tours %}
+<hr>
+
+{% if hitalx_my_expenses %}
+<section class="hitalx-cfp-section">
+  <h3>{% translate "Your expenses" %}</h3>
+  <table class="table table-sm table-striped">
+    <thead>
+      <tr>
+        <th>{% translate "Description" %}</th>
+        <th>{% translate "Amount" %}</th>
+        <th>{% translate "Paid" %}</th>
+        <th>{% translate "Notes" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for expense in hitalx_my_expenses %}
+      <tr>
+        <td>{{ expense.description }}</td>
+        <td>{{ expense.amount|floatformat:2 }} €</td>
+        <td>
+          {% if expense.paid %}
+            <span class="badge bg-success">{% translate "Currently: Paid" %}</span>
+          {% else %}
+            <span class="badge bg-secondary">{% translate "Currently: Unpaid" %}</span>
+          {% endif %}
+        </td>
+        <td>{{ expense.notes }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+
+{% if hitalx_my_tours %}
+<section class="hitalx-cfp-section">
+  <h3>{% translate "Your tours" %}</h3>
+  <ul class="list-group">
+    {% for tour in hitalx_my_tours %}
+    <li class="list-group-item">
+      <strong>{{ tour.description }}</strong>
+      {% if tour.departure_time %}
+        &mdash; {{ tour.departure_time }}
+      {% endif %}
+      {% if tour.start_location %}
+        &mdash; {{ tour.start_location }}
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+{% endif %}
+{% endblock content %}
