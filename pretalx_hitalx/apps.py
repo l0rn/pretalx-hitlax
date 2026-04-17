@@ -56,66 +56,104 @@ class PluginApp(AppConfig):
         Monkey-patch pretalx's CFP submission edit view to show the speaker's
         own expenses and tours in a read-only section at the bottom of the page.
         """
+        import importlib
+
         SubmissionsEditView = None
-        for module in (
-            "pretalx.cfp.views.user",
-            "pretalx.cfp.views.submissions",
-        ):
+        for module_name, class_name in [
+            ("pretalx.cfp.views.user", "SubmissionsEditView"),
+            ("pretalx.cfp.views.user", "SubmissionEditView"),
+            ("pretalx.cfp.views.submissions", "SubmissionsEditView"),
+            ("pretalx.cfp.views.submissions", "SubmissionEditView"),
+        ]:
             try:
-                import importlib
-                mod = importlib.import_module(module)
-                cls = getattr(mod, "SubmissionsEditView", None)
+                mod = importlib.import_module(module_name)
+                cls = getattr(mod, class_name, None)
                 if cls is not None:
                     SubmissionsEditView = cls
+                    logger.info("pretalx_hitalx: patching CFP view %s.%s", module_name, class_name)
                     break
-            except ImportError:
-                continue
+            except Exception as e:
+                logger.debug("pretalx_hitalx: could not import %s: %s", module_name, e)
 
         if SubmissionsEditView is None:
-            logger.warning("pretalx_hitalx: could not find SubmissionsEditView — CFP injection skipped")
+            logger.warning("pretalx_hitalx: SubmissionsEditView not found — CFP injection skipped")
             return
 
         if getattr(SubmissionsEditView, "_hitalx_cfp_patch", False):
             return
 
-        _orig_get_context_data = SubmissionsEditView.get_context_data
-        _orig_get_template_names = SubmissionsEditView.get_template_names
+        OUR_TEMPLATE = "pretalx_hitalx/cfp_submission_detail.html"
 
-        def _patched_get_template_names(self):
-            original = _orig_get_template_names(self)
-            return ["pretalx_hitalx/cfp_submission_detail.html"] + list(original)
-
-        def _patched_get_context_data(self, **kwargs):
-            ctx = _orig_get_context_data(self, **kwargs)
+        def _inject_hitalx_context(view_self):
+            """Return (expenses, tours) for the current user + submission event."""
             try:
                 from django_scopes import scope
-                from .models import ExpenseItem, Tour
 
-                submission = getattr(self, "object", None)
-                request = self.request
-                if submission is None or not hasattr(request, "user") or not request.user.is_authenticated:
-                    return ctx
+                request = view_self.request
+                if not hasattr(request, "user") or not request.user.is_authenticated:
+                    return [], []
 
-                event = submission.event
+                # Find the submission — try self.object first, then context
+                submission = getattr(view_self, "object", None)
+                if submission is None:
+                    return [], []
+
+                event = getattr(submission, "event", None)
+                if event is None:
+                    return [], []
+
                 with scope(event=event):
                     try:
                         profile = request.user.profiles.get(event=event)
                     except Exception:
-                        return ctx
+                        return [], []
 
-                    from django.utils.formats import date_format
-                    from django.utils.timezone import localtime
-
-                    # expenses belong to User; tours belong to SpeakerProfile via M2M
                     expenses = list(request.user.expenses.all().order_by("description"))
                     tours = list(profile.tours.all().order_by("departure_time"))
-
-                    ctx["hitalx_my_expenses"] = expenses
-                    ctx["hitalx_my_tours"] = tours
+                    return expenses, tours
             except Exception:
-                logger.exception("pretalx_hitalx: error injecting CFP context")
+                logger.exception("pretalx_hitalx: error building CFP context")
+                return [], []
+
+        # Patch get_context_data to inject our data into the context dict
+        _orig_get_context_data = SubmissionsEditView.get_context_data
+
+        def _patched_get_context_data(self, **kwargs):
+            ctx = _orig_get_context_data(self, **kwargs)
+            expenses, tours = _inject_hitalx_context(self)
+            ctx["hitalx_my_expenses"] = expenses
+            ctx["hitalx_my_tours"] = tours
             return ctx
 
-        SubmissionsEditView.get_template_names = _patched_get_template_names
         SubmissionsEditView.get_context_data = _patched_get_context_data
+
+        # Patch get_template_names (used by TemplateResponseMixin.render_to_response)
+        _orig_get_template_names = SubmissionsEditView.get_template_names
+
+        def _patched_get_template_names(self):
+            names = list(_orig_get_template_names(self))
+            if OUR_TEMPLATE not in names:
+                names = [OUR_TEMPLATE] + names
+            return names
+
+        SubmissionsEditView.get_template_names = _patched_get_template_names
+
+        # Also patch render_to_response as a fallback (some views bypass get_template_names)
+        _orig_render_to_response = getattr(SubmissionsEditView, "render_to_response", None)
+        if _orig_render_to_response:
+            def _patched_render_to_response(self, context, **response_kwargs):
+                response = _orig_render_to_response(self, context, **response_kwargs)
+                # TemplateResponse stores template_name and renders lazily — we can still change it
+                if hasattr(response, "template_name"):
+                    tnames = response.template_name
+                    if isinstance(tnames, str):
+                        tnames = [tnames]
+                    else:
+                        tnames = list(tnames)
+                    if OUR_TEMPLATE not in tnames:
+                        response.template_name = [OUR_TEMPLATE] + tnames
+                return response
+
+            SubmissionsEditView.render_to_response = _patched_render_to_response
+
         SubmissionsEditView._hitalx_cfp_patch = True

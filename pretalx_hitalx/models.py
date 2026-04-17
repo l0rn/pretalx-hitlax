@@ -33,6 +33,7 @@ class Tour(models.Model):
     description = models.TextField(blank=False, null=False)
     departure_time = models.DateTimeField(null=False, blank=False)
     start_location = models.TextField(null=False, blank=False)
+    notes = models.TextField(blank=True, default="")
     passengers = models.ManyToManyField(SpeakerProfile, related_name='tours')
     type = models.TextField(choices=TOUR_TYPE_CHOICES)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)

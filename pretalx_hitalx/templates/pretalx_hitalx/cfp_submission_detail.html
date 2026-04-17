@@ -8,7 +8,7 @@
 <hr>
 
 {% if hitalx_my_expenses %}
-<section class="hitalx-cfp-section">
+<section class="hitalx-cfp-section" style="margin-bottom: 2rem;">
   <h3>{% translate "Your expenses" %}</h3>
   <table class="table table-sm table-striped">
     <thead>
@@ -40,7 +40,7 @@
 {% endif %}
 
 {% if hitalx_my_tours %}
-<section class="hitalx-cfp-section">
+<section class="hitalx-cfp-section" style="margin-bottom: 2rem;">
   <h3>{% translate "Your tours" %}</h3>
   <ul class="list-group">
     {% for tour in hitalx_my_tours %}
@@ -50,7 +50,10 @@
         &mdash; {{ tour.departure_time }}
       {% endif %}
       {% if tour.start_location %}
-        &mdash; {{ tour.start_location }}
+        &mdash; <em>{% translate "Start location" %}: {{ tour.start_location }}</em>
+      {% endif %}
+      {% if tour.notes %}
+        <div class="text-muted small mt-1">{{ tour.notes }}</div>
       {% endif %}
     </li>
     {% endfor %}

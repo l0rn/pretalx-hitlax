@@ -93,9 +93,15 @@ class TourForm(ModelForm):
 
     class Meta:
         model = Tour
-        fields = ["description", "departure_time", "start_location", "type", "event", "passengers"]
-        labels = {"reference": _("Reference (URL)")}
-        widgets = {'event': forms.HiddenInput()}
+        fields = ["description", "departure_time", "start_location", "notes", "type", "event", "passengers"]
+        labels = {
+            "start_location": _("Start location"),
+            "notes": _("Notes"),
+        }
+        widgets = {
+            'event': forms.HiddenInput(),
+            'notes': forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+        }
         field_classes = {
             "passengers": SafeModelMultipleChoiceField,
         }
@@ -157,7 +163,8 @@ class SpeakerToursInlineForm:
         options = ""
         for tour in self._all_tours:
             when = date_format(localtime(tour.departure_time), format="SHORT_DATETIME_FORMAT")
-            label = f"{tour.description} — {when}"
+            loc = str(_("Start location")) + ": " + tour.start_location
+            label = f"{tour.description} — {when} — {loc}"
             sel = ' selected' if tour.id in self._current_ids else ''
             options += f'<option value="{tour.id}"{sel}>{label}</option>'
 

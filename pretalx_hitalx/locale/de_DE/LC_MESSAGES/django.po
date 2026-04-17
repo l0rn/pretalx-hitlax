@@ -275,3 +275,6 @@ msgstr "Deine Fahrten"
 
 msgid "Invalid selection"
 msgstr "Ungültige Auswahl"
+
+msgid "Start location"
+msgstr "Startort"
