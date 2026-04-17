@@ -44,18 +44,35 @@
     </form>
 
     {% if form.instance.pk %}
-        <form method="post" action="{% url 'plugins:pretalx_hitalx:expense.delete' event=request.event.slug speaker_id=speaker_id pk=form.instance.pk %}"
-              onsubmit="return confirm('{% translate "Delete this expense? This cannot be undone." %}');">
-            {% csrf_token %}
-            <div class="submit-group panel">
-                <span></span>
-                <span>
+        <div class="submit-group panel" id="hitalx-delete-trigger-row">
+            <span></span>
+            <span>
+                <button type="button" class="btn btn-danger"
+                        onclick="document.getElementById('hitalx-delete-trigger-row').style.display='none';
+                                 document.getElementById('hitalx-delete-confirm-row').style.display='flex';">
+                    <i class="fa fa-trash"></i> {% translate "Delete expense" %}
+                </button>
+            </span>
+        </div>
+        <div class="submit-group panel" id="hitalx-delete-confirm-row" style="display:none;">
+            <span class="text-danger fw-bold">
+                <i class="fa fa-exclamation-triangle"></i>
+                {% translate "Really delete this expense? This cannot be undone." %}
+            </span>
+            <span>
+                <button type="button" class="btn btn-outline-secondary me-2"
+                        onclick="document.getElementById('hitalx-delete-confirm-row').style.display='none';
+                                 document.getElementById('hitalx-delete-trigger-row').style.display='flex';">
+                    {% translate "Cancel" %}
+                </button>
+                <form method="post" action="{% url 'plugins:pretalx_hitalx:expense.delete' event=request.event.slug speaker_id=speaker_id pk=form.instance.pk %}" style="display:inline;">
+                    {% csrf_token %}
                     <button class="btn btn-danger" type="submit">
-                        <i class="fa fa-trash"></i> {% translate "Delete expense" %}
+                        <i class="fa fa-trash"></i> {% translate "Yes, delete" %}
                     </button>
-                </span>
-            </div>
-        </form>
+                </form>
+            </span>
+        </div>
     {% endif %}
     <div class="dashboard-history">
         <h3>{% translate 'Activity Log' %}</h3>
