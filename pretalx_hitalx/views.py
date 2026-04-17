@@ -33,6 +33,15 @@ class SpeakerList(EventPermissionRequired, Filterable, ListView):
     paginate_by = 25
     permission_required = "person.orga_list_speakerprofile"
 
+    def get_paginate_by(self, queryset):
+        try:
+            page_size = int(self.request.GET.get("page_size", 25))
+            if page_size in (25, 100, 250):
+                return page_size
+        except (ValueError, TypeError):
+            pass
+        return 25
+
     def get_filter_form(self):
         return SpeakerFilterForm(self.request.GET, event=self.request.event)
 
@@ -181,6 +190,7 @@ class SpeakerExpenseDetail(PermissionRequired, CreateOrUpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["speaker_id"] = self.kwargs["speaker_id"]
         if self.object:
             context["log_entries"] = ActivityLog.objects.filter(
                 event=self.request.event,

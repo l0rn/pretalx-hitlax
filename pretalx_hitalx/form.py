@@ -123,7 +123,7 @@ class SpeakerExpensesInlineForm:
         self.event = event
         self.prefix = prefix
         queryset = speaker.expenses.all().order_by("-id") if speaker else ExpenseItem.objects.none()
-        FormSet = modelformset_factory(ExpenseItem, form=ExpenseItemInlineForm, extra=1, can_delete=False)
+        FormSet = modelformset_factory(ExpenseItem, form=ExpenseItemInlineForm, extra=1, can_delete=True)
         self.formset = FormSet(data=data, queryset=queryset, prefix=prefix)
 
     def is_valid(self):
@@ -134,8 +134,14 @@ class SpeakerExpensesInlineForm:
         return self.formset.errors
 
     def save(self):
+        # Delete marked forms first
+        for form in self.formset.deleted_forms:
+            if form.instance.pk:
+                form.instance.delete()
         saved = []
         for form in self.formset.forms:
+            if form in self.formset.deleted_forms:
+                continue
             if not hasattr(form, "cleaned_data"):
                 continue
             if not form.cleaned_data:
@@ -158,6 +164,7 @@ class SpeakerExpensesInlineForm:
             f"<td>{form['reference']}</td>"
             f"<td>{form['notes']}</td>"
             f"<td>{form['paid']}</td>"
+            f"<td class='text-center'>{form['DELETE']}</td>"
             "</tr>"
         )
 
@@ -167,7 +174,7 @@ class SpeakerExpensesInlineForm:
         html = (
             str(self.formset.management_form)
             + '<table class="table table-sm table-hover" id="hitalx-expense-table">'
-            + f'<thead><tr><th>{_("Description")}</th><th>{_("Amount")}</th><th>{_("Reference (URL)")}</th><th>{_("Notes")}</th><th>{_("Paid")}</th></tr></thead>'
+            + f'<thead><tr><th>{_("Description")}</th><th>{_("Amount")}</th><th>{_("Reference (URL)")}</th><th>{_("Notes")}</th><th>{_("Paid")}</th><th>{_("Delete")}</th></tr></thead>'
             + f'<tbody>{rows}</tbody></table>'
             + f'<button type="button" class="btn btn-sm btn-outline-primary" id="hitalx-add-expense">+ {_("Add expense")}</button>'
             + f'<template id="hitalx-expense-row-template">{empty_row}</template>'

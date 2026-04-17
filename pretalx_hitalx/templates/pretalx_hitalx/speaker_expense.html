@@ -42,6 +42,33 @@
             </span>
         </div>
     </form>
+
+    {% if form.instance.pk %}
+        {% has_perm 'orga.change_speaker' request.user request.event as can_edit_speaker %}
+        {% if can_edit_speaker %}
+            <form method="post" action="{% url 'plugins:pretalx_hitalx:expense.mark' event=request.event.slug speaker_id=speaker_id pk=form.instance.pk %}">
+                {% csrf_token %}
+                <input type="hidden" name="paid" value="{{ form.instance.paid|yesno:'false,true' }}">
+                <div class="submit-group panel">
+                    <span>
+                        <i class="fa fa-lg text-{{ form.instance.paid|yesno:'success,secondary' }} fa-{{ form.instance.paid|yesno:'check,close' }}"></i>
+                        {% if form.instance.paid %}{% translate "Currently: Paid" %}{% else %}{% translate "Currently: Unpaid" %}{% endif %}
+                    </span>
+                    <span>
+                        {% if form.instance.paid %}
+                            <button class="btn btn-outline-danger" type="submit">
+                                <i class="fa fa-times"></i> {% translate "Mark as unpaid" %}
+                            </button>
+                        {% else %}
+                            <button class="btn btn-outline-primary" type="submit">
+                                <i class="fa fa-check"></i> {% translate "Mark as paid" %}
+                            </button>
+                        {% endif %}
+                    </span>
+                </div>
+            </form>
+        {% endif %}
+    {% endif %}
     <div class="dashboard-history">
         <h3>{% translate 'Activity Log' %}</h3>
         {% include "common/logs.html" with entries=log_entries hide_title=True %}
