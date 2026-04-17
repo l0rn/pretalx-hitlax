@@ -1,7 +1,6 @@
 {% extends "orga/base.html" %}
 {% load i18n %}
 {% load rules %}
-{% load static %}
 
 {% block title %}
   {% if form.instance.pk %}
@@ -118,5 +117,5 @@
     </div>
   </form>
 
-  <script defer src="{% static 'pretalx_hitalx/passengers_widget.js' %}"></script>
+  <script defer src="/static/pretalx_hitalx/passengers_widget.js"></script>
 {% endblock %}
