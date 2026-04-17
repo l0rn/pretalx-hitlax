@@ -78,10 +78,15 @@
         btn.className = 'hitalx-pw-pill-remove';
         btn.setAttribute('aria-label', 'Remove ' + opt.label);
         btn.textContent = '\u00d7';
+        btn.addEventListener('mousedown', function (e) {
+          // Prevent the button from stealing focus from searchInput,
+          // which would trigger a spurious focus→renderDropdown cycle.
+          e.preventDefault();
+        });
         btn.addEventListener('click', function () {
           setSelected(value, false);
           renderPills();
-          dropdown.style.display = 'none'; // don't reopen — user didn't ask to search
+          closeDropdown();
         });
         pill.appendChild(btn);
         pillRow.appendChild(pill);
@@ -133,6 +138,11 @@
       dropdown.style.display = 'block';
     }
 
+    /* ── helpers ── */
+    function closeDropdown() {
+      dropdown.style.display = 'none';
+    }
+
     /* ── events ── */
     searchInput.addEventListener('input', function () {
       renderDropdown(this.value);
@@ -143,15 +153,18 @@
     });
 
     searchInput.addEventListener('blur', function () {
-      // Small delay so mousedown on a dropdown item fires before we hide
-      setTimeout(function () { dropdown.style.display = 'none'; }, 200);
+      // Delay so mousedown on a dropdown item fires first (item selection via mousedown)
+      setTimeout(closeDropdown, 200);
     });
 
-    document.addEventListener('click', function (e) {
+    // Close when clicking anything outside the widget (capture phase fires before
+    // any inner handlers, ensuring the dropdown is already hidden by the time
+    // inner click handlers run if the click was outside)
+    document.addEventListener('mousedown', function (e) {
       if (!wrapper.contains(e.target)) {
-        dropdown.style.display = 'none';
+        closeDropdown();
       }
-    });
+    }, true);
 
     searchInput.addEventListener('keydown', function (e) {
       if (e.key === 'Backspace' && this.value === '') {
@@ -160,11 +173,11 @@
           var last = pills[pills.length - 1];
           setSelected(last.dataset.value, false);
           renderPills();
-          renderDropdown('');
+          closeDropdown();
         }
       }
       if (e.key === 'Escape') {
-        dropdown.style.display = 'none';
+        closeDropdown();
       }
     });
 
