@@ -73,7 +73,7 @@ class PassengerChoiceField(forms.ModelMultipleChoiceField):
 class TourForm(ModelForm):
     description = CharField()
     start_location = CharField()
-    departure_time = forms.DateTimeField(widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}))
+    departure_time = forms.DateTimeField(widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}, format="%Y-%m-%dT%H:%M"))
     passengers = PassengerChoiceField(
         queryset=SpeakerProfile.objects.none(),
         widget=forms.SelectMultiple(attrs={

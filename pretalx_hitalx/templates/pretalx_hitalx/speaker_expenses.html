@@ -30,24 +30,23 @@
             </thead>
             <tbody>
                 {% for expense in object_list %}
-                    {% has_perm 'orga.change_speaker' request.user speaker_profile as can_edit_speaker %}
                     <tr>
                         <td><a
-                            href="{% url 'plugins:pretalx_hitalx:expense.view' event=request.event.slug speaker_id=expense.speaker.id pk=expense.id %} ">{{ expense.description }}</a>
+                            href="{% url 'plugins:pretalx_hitalx:expense.view' event=request.event.slug speaker_id=expense.speaker.id pk=expense.id %}">{{ expense.description }}</a>
                         </td>
                         <td>{{ expense.amount | euro_amount }}</td>
                         <td>
-                            <i
-                                class="fa fa-lg text-{{ expense.paid|yesno:'success,secondary' }} fa-{{ expense.paid|yesno:'check,close' }}"></i>
                             <form style="display: inline" method="post" action="{% url 'plugins:pretalx_hitalx:expense.mark' event=request.event.slug speaker_id=expense.speaker.id pk=expense.id %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="paid" value="{{ expense.paid|yesno:'false,true' }}">
-                                {% if can_edit_speaker %}
-                                    {% if expense.paid %}
-                                        <button class="btn btn-sm btn-outline-danger" type="submit">{% translate "Mark as unpaid" %}</button>
-                                    {% else %}
-                                        <button class="btn btn-sm btn-outline-primary" type="submit">{% translate "Mark as paid" %}</button>
-                                    {% endif %}
+                                {% if expense.paid %}
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">
+                                        <i class="fa fa-times"></i> {% translate "Mark as unpaid" %}
+                                    </button>
+                                {% else %}
+                                    <button class="btn btn-sm btn-outline-primary" type="submit">
+                                        <i class="fa fa-check"></i> {% translate "Mark as paid" %}
+                                    </button>
                                 {% endif %}
                             </form>
                         </td>

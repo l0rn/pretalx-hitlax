@@ -3,8 +3,6 @@
 {% load rules %}
 {% load static %}
 
-
-
 {% block title %}
   {% if form.instance.pk %}
     {% translate 'Tour: ' %}{{ form.instance.description }}
@@ -12,7 +10,75 @@
     {% translate 'New Tour' %}
   {% endif %}
 {% endblock %}
+
 {% block content %}
+<style>
+.hitalx-pw-wrapper { position: relative; }
+.hitalx-pw-pillbox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  min-height: 38px;
+  height: auto;
+  cursor: text;
+  padding: 4px 8px;
+}
+.hitalx-pw-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: normal;
+  white-space: nowrap;
+}
+.hitalx-pw-pill-remove {
+  background: none;
+  border: none;
+  padding: 0;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.75;
+  cursor: pointer;
+  font-size: 1.1em;
+}
+.hitalx-pw-pill-remove:hover { opacity: 1; }
+.hitalx-pw-input {
+  border: none;
+  outline: none;
+  flex: 1;
+  min-width: 160px;
+  background: transparent;
+  font-size: 1em;
+}
+.hitalx-pw-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+  z-index: 1050;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.hitalx-pw-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 0.95em;
+}
+.hitalx-pw-item:hover { background: #e9ecef; }
+.hitalx-pw-item mark {
+  background: #fff3cd;
+  padding: 0;
+  font-weight: bold;
+}
+</style>
+
   <h2>
     {% if form.instance.pk %}
       {% translate 'Tour: ' %}{{ form.instance.description }}
@@ -35,44 +101,22 @@
         {{ form.passengers.label }}
       </label>
       <div class="col-md-9">
-        <input
-          type="text"
-          id="hitalx-passenger-search"
-          class="form-control mb-2"
-          placeholder="{% translate 'Search for a speaker…' %}"
-          autocomplete="off"
-        >
+        {# The JS widget hides this select and builds the pill UI on top #}
         {{ form.passengers }}
-        <small class="form-text text-muted">
-          {% translate "Hold Ctrl (or ⌘ on Mac) to select multiple speakers." %}
-        </small>
         {{ form.passengers.errors }}
       </div>
     </div>
 
     <div class="submit-group panel">
-      <span>
-      </span>
+      <span></span>
       <span>
         <button type="submit" class="btn btn-success btn-lg">
-            <i class="fa fa-check"></i>
-            {% translate "Save" %}
+          <i class="fa fa-check"></i>
+          {% translate "Save" %}
         </button>
       </span>
     </div>
   </form>
 
-  <script>
-  (function () {
-    var search = document.getElementById('hitalx-passenger-search');
-    var sel = document.querySelector('.hitalx-passenger-select');
-    if (!search || !sel) return;
-    search.addEventListener('input', function () {
-      var q = this.value.toLowerCase().trim();
-      Array.from(sel.options).forEach(function (opt) {
-        opt.hidden = q !== '' && !opt.text.toLowerCase().includes(q) && !opt.selected;
-      });
-    });
-  })();
-  </script>
+  <script defer src="{% static 'pretalx_hitalx/passengers_widget.js' %}"></script>
 {% endblock %}

@@ -202,6 +202,38 @@ class SpeakerExpenseDetail(PermissionRequired, CreateOrUpdateView):
         return context
 
 
+class DeleteExpenseView(PermissionRequired, View):
+    permission_required = "person.orga_view_speakerprofile"
+    write_permission_required = "person.update_speakerprofile"
+
+    @cached_property
+    def object(self):
+        return ExpenseItem.objects.filter(pk=self.kwargs.get("pk")).first()
+
+    @property
+    def permission_object(self):
+        return SpeakerProfile.objects.filter(
+            user=self.kwargs["speaker_id"], event=self.request.event
+        ).first()
+
+    def get_permission_object(self):
+        return self.permission_object
+
+    def post(self, request, *args, **kwargs):
+        obj = self.object
+        if obj:
+            obj.delete()
+        return HttpResponseRedirect(
+            reverse(
+                "plugins:pretalx_hitalx:expenses.view",
+                kwargs={
+                    "event": request.event.slug,
+                    "speaker_id": kwargs["speaker_id"],
+                },
+            )
+        )
+
+
 class MarkExpenseView(PermissionRequired, View):
     model = ExpenseItem
     context_object_name = "expense_item"

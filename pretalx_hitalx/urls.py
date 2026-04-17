@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    DeleteExpenseView,
     MarkExpenseView,
     SpeakerExpenseDetail,
     SpeakerExpenseList,
@@ -73,5 +74,10 @@ urlpatterns = [
         "orga/event/<slug:event>/speakers/<int:speaker_id>/expense/<int:pk>/mark",
         view=MarkExpenseView.as_view(),
         name="expense.mark",
+    ),
+    path(
+        "orga/event/<slug:event>/speakers/<int:speaker_id>/expense/<int:pk>/delete",
+        view=DeleteExpenseView.as_view(),
+        name="expense.delete",
     ),
 ]
