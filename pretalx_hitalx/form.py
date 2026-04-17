@@ -21,13 +21,12 @@ class SpeakerExpenseForm(ReadOnlyFlag, ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["speaker"].disabled = True
-        self.fields["paid"].disabled = True
         self.fields["reference"].label = _("Reference (URL)")
 
     class Meta:
         model = ExpenseItem
         fields = ["speaker", "description", "amount", "paid", "reference", "notes"]
-        readonly_fields = ["speaker", "paid"]
+        readonly_fields = ["speaker"]
 
 
 class TourChoiceField(forms.ModelMultipleChoiceField):

@@ -10,7 +10,7 @@
 
     <div class="submit-group search-submit-group">
         <form class="search-form">
-            <p>
+            <p style="margin-bottom: 1rem;">
                 <label for="id_q">{% translate "Search by name or email" %}</label>
                 <input type="text" name="q" id="id_q" class="form-control" value="{{ request.GET.q }}" placeholder="{% translate 'Name or e-mail…' %}">
             </p>
