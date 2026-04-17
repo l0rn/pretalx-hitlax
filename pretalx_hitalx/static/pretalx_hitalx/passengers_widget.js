@@ -123,7 +123,7 @@
           setSelected(o.value, true);
           searchInput.value = '';
           renderPills();
-          renderDropdown('');
+          dropdown.style.display = 'none';
           searchInput.focus();
         });
         dropdown.appendChild(item);
