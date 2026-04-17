@@ -47,9 +47,7 @@
         <div class="submit-group panel" id="hitalx-delete-trigger-row">
             <span></span>
             <span>
-                <button type="button" class="btn btn-danger"
-                        onclick="document.getElementById('hitalx-delete-trigger-row').style.display='none';
-                                 document.getElementById('hitalx-delete-confirm-row').style.display='flex';">
+                <button type="button" class="btn btn-danger" id="hitalx-delete-btn">
                     <i class="fa fa-trash"></i> {% translate "Delete expense" %}
                 </button>
             </span>
@@ -60,9 +58,7 @@
                 {% translate "Really delete this expense? This cannot be undone." %}
             </span>
             <span>
-                <button type="button" class="btn btn-outline-secondary me-2"
-                        onclick="document.getElementById('hitalx-delete-confirm-row').style.display='none';
-                                 document.getElementById('hitalx-delete-trigger-row').style.display='flex';">
+                <button type="button" class="btn btn-outline-secondary me-2" id="hitalx-delete-cancel-btn">
                     {% translate "Cancel" %}
                 </button>
                 <form method="post" action="{% url 'plugins:pretalx_hitalx:expense.delete' event=request.event.slug speaker_id=speaker_id pk=form.instance.pk %}" style="display:inline;">
@@ -73,6 +69,20 @@
                 </form>
             </span>
         </div>
+        <script>
+        (function () {
+            var triggerRow = document.getElementById('hitalx-delete-trigger-row');
+            var confirmRow = document.getElementById('hitalx-delete-confirm-row');
+            document.getElementById('hitalx-delete-btn').addEventListener('click', function () {
+                triggerRow.style.display = 'none';
+                confirmRow.style.display = '';
+            });
+            document.getElementById('hitalx-delete-cancel-btn').addEventListener('click', function () {
+                confirmRow.style.display = 'none';
+                triggerRow.style.display = '';
+            });
+        })();
+        </script>
     {% endif %}
     <div class="dashboard-history">
         <h3>{% translate 'Activity Log' %}</h3>

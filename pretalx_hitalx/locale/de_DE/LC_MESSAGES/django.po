@@ -221,3 +221,48 @@ msgstr "Einreichungen nach Tag (alle)"
 
 msgid "Proposals by tag (accepted & confirmed)"
 msgstr "Einreichungen nach Tag (angenommen & bestätigt)"
+
+msgid "Search by name or email"
+msgstr "Nach Name oder E-Mail suchen"
+
+msgid "Name or e-mail…"
+msgstr "Name oder E-Mail…"
+
+msgid "Search"
+msgstr "Suchen"
+
+msgid "Mark as unpaid"
+msgstr "Als unbezahlt markieren"
+
+msgid "Mark as paid"
+msgstr "Als bezahlt markieren"
+
+msgid "Delete expense"
+msgstr "Ausgabe löschen"
+
+msgid "Really delete this expense? This cannot be undone."
+msgstr "Diese Ausgabe wirklich löschen? Das kann nicht rückgängig gemacht werden."
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Yes, delete"
+msgstr "Ja, löschen"
+
+msgid "No tours assigned."
+msgstr "Keine Fahrten zugewiesen."
+
+msgid "Currently: Paid"
+msgstr "Aktuell: Bezahlt"
+
+msgid "Currently: Unpaid"
+msgstr "Aktuell: Nicht bezahlt"
+
+msgid "Hold Ctrl (or ⌘ on Mac) to select multiple speakers."
+msgstr "Strg (oder ⌘ auf dem Mac) gedrückt halten, um mehrere Speaker auszuwählen."
+
+msgid "Delete"
+msgstr "Löschen"
+
+msgid "Some changes could not be saved."
+msgstr "Einige Änderungen konnten nicht gespeichert werden."
