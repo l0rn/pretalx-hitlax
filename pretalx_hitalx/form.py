@@ -76,9 +76,12 @@ class TourForm(ModelForm):
     departure_time = forms.DateTimeField(widget=forms.DateTimeInput(attrs={"type": "datetime-local", "class": "form-control"}))
     passengers = PassengerChoiceField(
         queryset=SpeakerProfile.objects.none(),
-        widget=forms.CheckboxSelectMultiple(),
+        widget=forms.SelectMultiple(attrs={
+            "class": "form-control hitalx-passenger-select",
+            "size": "8",
+        }),
         blank=True,
-        required=False
+        required=False,
     )
 
     def __init__(self, *args, user=None, locales=None, organiser=None, **kwargs):
@@ -87,16 +90,52 @@ class TourForm(ModelForm):
         event_id = initial.get("event") or getattr(self.instance, "event_id", None)
         if event_id:
             with scope(event=Event.objects.get(id=event_id)):
-                self.fields["passengers"].queryset = SpeakerProfile.objects.all()
+                self.fields["passengers"].queryset = SpeakerProfile.objects.all().order_by("user__name")
 
     class Meta:
         model = Tour
         fields = ["description", "departure_time", "start_location", "type", "event", "passengers"]
         labels = {"reference": _("Reference (URL)")}
-        widgets = {'event': forms.HiddenInput(), 'passengers': forms.CheckboxSelectMultiple()}
+        widgets = {'event': forms.HiddenInput()}
         field_classes = {
             "passengers": SafeModelMultipleChoiceField,
         }
+
+
+class SpeakerToursDisplay:
+    """Read-only display of a speaker's assigned tours, injected into the speaker detail page."""
+    label = _("Tours")
+
+    def __init__(self, *args, speaker=None, instance=None, data=None, prefix=None, **kwargs):
+        self.profile = instance  # SpeakerProfile
+
+    def is_valid(self):
+        return True
+
+    @property
+    def errors(self):
+        return {}
+
+    def save(self):
+        return None
+
+    def _render(self):
+        if not self.profile:
+            return mark_safe('<p class="text-muted"><em>' + str(_("No tours assigned.")) + '</em></p>')
+        tours = list(self.profile.tours.all().order_by("departure_time"))
+        if not tours:
+            return mark_safe('<p class="text-muted"><em>' + str(_("No tours assigned.")) + '</em></p>')
+        items = "".join(
+            f"<li>{t.description} — {date_format(localtime(t.departure_time), format='SHORT_DATETIME_FORMAT')}</li>"
+            for t in tours
+        )
+        return mark_safe(f'<ul class="list-unstyled mb-0">{items}</ul>')
+
+    def __html__(self):
+        return self._render()
+
+    def __str__(self):
+        return self._render()
 
 
 
