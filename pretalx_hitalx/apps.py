@@ -53,8 +53,9 @@ class PluginApp(AppConfig):
 
     def _patch_cfp_submission_view(self):
         """
-        Monkey-patch pretalx's CFP submission edit view to show the speaker's
-        own expenses and tours in a read-only section at the bottom of the page.
+        Monkey-patch pretalx's CFP SubmissionsEditView.dispatch() to inject
+        a read-only expense/tour section into the rendered response HTML.
+        This approach works regardless of how the view renders its template.
         """
         import importlib
 
@@ -63,17 +64,19 @@ class PluginApp(AppConfig):
             ("pretalx.cfp.views.user", "SubmissionsEditView"),
             ("pretalx.cfp.views.user", "SubmissionEditView"),
             ("pretalx.cfp.views.submissions", "SubmissionsEditView"),
-            ("pretalx.cfp.views.submissions", "SubmissionEditView"),
         ]:
             try:
                 mod = importlib.import_module(module_name)
                 cls = getattr(mod, class_name, None)
                 if cls is not None:
                     SubmissionsEditView = cls
-                    logger.info("pretalx_hitalx: patching CFP view %s.%s", module_name, class_name)
+                    logger.info(
+                        "pretalx_hitalx: found CFP view at %s.%s — patching dispatch()",
+                        module_name, class_name,
+                    )
                     break
             except Exception as e:
-                logger.debug("pretalx_hitalx: could not import %s: %s", module_name, e)
+                logger.warning("pretalx_hitalx: could not import %s: %s", module_name, e)
 
         if SubmissionsEditView is None:
             logger.warning("pretalx_hitalx: SubmissionsEditView not found — CFP injection skipped")
@@ -82,78 +85,60 @@ class PluginApp(AppConfig):
         if getattr(SubmissionsEditView, "_hitalx_cfp_patch", False):
             return
 
-        OUR_TEMPLATE = "pretalx_hitalx/cfp_submission_detail.html"
+        _orig_dispatch = SubmissionsEditView.dispatch
 
-        def _inject_hitalx_context(view_self):
-            """Return (expenses, tours) for the current user + submission event."""
+        def _patched_dispatch(self, request, *args, **kwargs):
+            response = _orig_dispatch(self, request, *args, **kwargs)
+
+            # Only inject on GET responses that render HTML
+            if request.method != "GET":
+                return response
+
             try:
+                from django.template.loader import render_to_string
                 from django_scopes import scope
 
-                request = view_self.request
-                if not hasattr(request, "user") or not request.user.is_authenticated:
-                    return [], []
-
-                # Find the submission — try self.object first, then context
-                submission = getattr(view_self, "object", None)
-                if submission is None:
-                    return [], []
+                submission = getattr(self, "object", None)
+                if submission is None or not getattr(request, "user", None) or not request.user.is_authenticated:
+                    return response
 
                 event = getattr(submission, "event", None)
                 if event is None:
-                    return [], []
+                    return response
 
                 with scope(event=event):
                     try:
                         profile = request.user.profiles.get(event=event)
                     except Exception:
-                        return [], []
+                        return response
 
                     expenses = list(request.user.expenses.all().order_by("description"))
                     tours = list(profile.tours.all().order_by("departure_time"))
-                    return expenses, tours
+
+                if not expenses and not tours:
+                    return response
+
+                extra_html = render_to_string(
+                    "pretalx_hitalx/cfp_expense_tour_section.html",
+                    {"hitalx_my_expenses": expenses, "hitalx_my_tours": tours},
+                    request=request,
+                )
+
+                # Force TemplateResponse to render if it hasn't yet
+                if hasattr(response, "render") and not getattr(response, "is_rendered", True):
+                    response.render()
+
+                if hasattr(response, "content"):
+                    content = response.content
+                    marker = b"</body>"
+                    if marker in content:
+                        response.content = content.replace(
+                            marker, extra_html.encode("utf-8") + marker, 1
+                        )
             except Exception:
-                logger.exception("pretalx_hitalx: error building CFP context")
-                return [], []
+                logger.exception("pretalx_hitalx: CFP dispatch injection failed")
 
-        # Patch get_context_data to inject our data into the context dict
-        _orig_get_context_data = SubmissionsEditView.get_context_data
+            return response
 
-        def _patched_get_context_data(self, **kwargs):
-            ctx = _orig_get_context_data(self, **kwargs)
-            expenses, tours = _inject_hitalx_context(self)
-            ctx["hitalx_my_expenses"] = expenses
-            ctx["hitalx_my_tours"] = tours
-            return ctx
-
-        SubmissionsEditView.get_context_data = _patched_get_context_data
-
-        # Patch get_template_names (used by TemplateResponseMixin.render_to_response)
-        _orig_get_template_names = SubmissionsEditView.get_template_names
-
-        def _patched_get_template_names(self):
-            names = list(_orig_get_template_names(self))
-            if OUR_TEMPLATE not in names:
-                names = [OUR_TEMPLATE] + names
-            return names
-
-        SubmissionsEditView.get_template_names = _patched_get_template_names
-
-        # Also patch render_to_response as a fallback (some views bypass get_template_names)
-        _orig_render_to_response = getattr(SubmissionsEditView, "render_to_response", None)
-        if _orig_render_to_response:
-            def _patched_render_to_response(self, context, **response_kwargs):
-                response = _orig_render_to_response(self, context, **response_kwargs)
-                # TemplateResponse stores template_name and renders lazily — we can still change it
-                if hasattr(response, "template_name"):
-                    tnames = response.template_name
-                    if isinstance(tnames, str):
-                        tnames = [tnames]
-                    else:
-                        tnames = list(tnames)
-                    if OUR_TEMPLATE not in tnames:
-                        response.template_name = [OUR_TEMPLATE] + tnames
-                return response
-
-            SubmissionsEditView.render_to_response = _patched_render_to_response
-
+        SubmissionsEditView.dispatch = _patched_dispatch
         SubmissionsEditView._hitalx_cfp_patch = True
