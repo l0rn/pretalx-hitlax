@@ -81,7 +81,7 @@
         btn.addEventListener('click', function () {
           setSelected(value, false);
           renderPills();
-          renderDropdown(searchInput.value);
+          dropdown.style.display = 'none'; // don't reopen — user didn't ask to search
         });
         pill.appendChild(btn);
         pillRow.appendChild(pill);
@@ -143,7 +143,14 @@
     });
 
     searchInput.addEventListener('blur', function () {
+      // Small delay so mousedown on a dropdown item fires before we hide
       setTimeout(function () { dropdown.style.display = 'none'; }, 200);
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!wrapper.contains(e.target)) {
+        dropdown.style.display = 'none';
+      }
     });
 
     searchInput.addEventListener('keydown', function (e) {
