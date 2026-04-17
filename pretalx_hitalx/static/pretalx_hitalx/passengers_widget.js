@@ -28,7 +28,7 @@
     hiddenSelect.parentNode.insertBefore(wrapper, hiddenSelect);
 
     var pillBox = document.createElement('div');
-    pillBox.className = 'hitalx-pw-pillbox form-control';
+    pillBox.className = 'hitalx-pw-pillbox';
     wrapper.appendChild(pillBox);
 
     var searchInput = document.createElement('input');
