@@ -161,11 +161,7 @@ class SpeakerToursInlineForm:
             sel = ' selected' if tour.id in self._current_ids else ''
             options += f'<option value="{tour.id}"{sel}>{label}</option>'
 
-        html = (
-            '<link rel="stylesheet" href="/static/pretalx_hitalx/passengers_widget.css">'
-            f'<select multiple name="{field_name}" class="hitalx-pw-select">{options}</select>'
-            '<script defer src="/static/pretalx_hitalx/passengers_widget.js"></script>'
-        )
+        html = f'<select multiple name="{field_name}" class="hitalx-pw-select">{options}</select>'
         return mark_safe(html)
 
     def __html__(self):

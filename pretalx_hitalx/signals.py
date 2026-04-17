@@ -116,6 +116,17 @@ def tag_statistics_head(sender, request, **kwargs):
     return f'<script defer src="{js_url}"></script>'
 
 
+@receiver(html_head, dispatch_uid="hitalx_passengers_widget_head")
+def passengers_widget_head(sender, request, **kwargs):
+    """Inject pill/autocomplete widget assets on every orga page (used on speaker detail and tour edit)."""
+    css_url = static("pretalx_hitalx/passengers_widget.css")
+    js_url = static("pretalx_hitalx/passengers_widget.js")
+    return (
+        f'<link rel="stylesheet" href="{css_url}">'
+        f'<script defer src="{js_url}"></script>'
+    )
+
+
 @receiver(html_below_orga_page, dispatch_uid="hitalx_tag_statistics")
 def tag_statistics_charts(sender, request, **kwargs):
     """Inject tag distribution chart cards on the submissions statistics page."""

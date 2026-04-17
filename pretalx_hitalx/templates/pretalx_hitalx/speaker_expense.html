@@ -69,20 +69,7 @@
                 </form>
             </span>
         </div>
-        <script>
-        (function () {
-            var triggerRow = document.getElementById('hitalx-delete-trigger-row');
-            var confirmRow = document.getElementById('hitalx-delete-confirm-row');
-            document.getElementById('hitalx-delete-btn').addEventListener('click', function () {
-                triggerRow.style.display = 'none';
-                confirmRow.style.display = '';
-            });
-            document.getElementById('hitalx-delete-cancel-btn').addEventListener('click', function () {
-                confirmRow.style.display = 'none';
-                triggerRow.style.display = '';
-            });
-        })();
-        </script>
+        <script defer src="/static/pretalx_hitalx/expense_delete.js"></script>
     {% endif %}
     <div class="dashboard-history">
         <h3>{% translate 'Activity Log' %}</h3>
