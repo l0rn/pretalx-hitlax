@@ -1,51 +1,54 @@
 /**
  * Pill / autocomplete widget for the tour passengers field.
- * Wraps the hidden <select multiple class="hitalx-passenger-select"> with a
- * tag-input UI: text field that filters a dropdown, selected items shown as
- * removable pills.
+ *
+ * Structure built on top of the hidden <select multiple>:
+ *
+ *   .hitalx-pw-wrapper
+ *     .hitalx-pw-input-row          ← position:relative anchor for dropdown
+ *       input.form-control           ← search / filter (never moves)
+ *       .hitalx-pw-dropdown          ← floating option list
+ *     .hitalx-pw-pills               ← selected speakers as removable pills
  */
 (function () {
   function init() {
     var hiddenSelect = document.querySelector('.hitalx-passenger-select');
     if (!hiddenSelect) return;
 
-    // Snapshot all options before hiding the original select
     var allOptions = Array.from(hiddenSelect.options).map(function (o) {
       return { value: o.value, label: o.text };
     });
 
     hiddenSelect.style.display = 'none';
 
-    /* ── DOM structure ──────────────────────────────────────────────────────
-       .hitalx-pw-wrapper
-         .hitalx-pw-pillbox          ← looks like the input border
-           .hitalx-pw-pill × N       ← one per selected speaker
-           input.hitalx-pw-input     ← search text
-         .hitalx-pw-dropdown         ← floating option list
-    ───────────────────────────────────────────────────────────────────── */
+    /* ── build DOM ── */
     var wrapper = document.createElement('div');
     wrapper.className = 'hitalx-pw-wrapper';
     hiddenSelect.parentNode.insertBefore(wrapper, hiddenSelect);
 
-    var pillBox = document.createElement('div');
-    pillBox.className = 'hitalx-pw-pillbox';
-    wrapper.appendChild(pillBox);
+    // Input row (position:relative so dropdown is positioned against it)
+    var inputRow = document.createElement('div');
+    inputRow.className = 'hitalx-pw-input-row';
+    wrapper.appendChild(inputRow);
 
     var searchInput = document.createElement('input');
     searchInput.type = 'text';
-    searchInput.className = 'hitalx-pw-input';
+    searchInput.className = 'form-control';
     searchInput.placeholder = 'Add speaker\u2026';
     searchInput.autocomplete = 'off';
     searchInput.spellcheck = false;
-    pillBox.appendChild(searchInput);
+    inputRow.appendChild(searchInput);
 
     var dropdown = document.createElement('div');
     dropdown.className = 'hitalx-pw-dropdown';
     dropdown.style.display = 'none';
-    wrapper.appendChild(dropdown);
+    inputRow.appendChild(dropdown);
 
-    // ── helpers ────────────────────────────────────────────────────────────
+    // Pills row (below the input, never causes the input to shift)
+    var pillRow = document.createElement('div');
+    pillRow.className = 'hitalx-pw-pills';
+    wrapper.appendChild(pillRow);
 
+    /* ── helpers ── */
     function selectedValues() {
       return Array.from(hiddenSelect.options)
         .filter(function (o) { return o.selected; })
@@ -57,38 +60,30 @@
       if (opt) opt.selected = selected;
     }
 
-    function removePills() {
-      Array.from(pillBox.querySelectorAll('.hitalx-pw-pill')).forEach(function (p) {
-        p.remove();
-      });
-    }
-
     function renderPills() {
-      removePills();
+      pillRow.innerHTML = '';
       selectedValues().forEach(function (value) {
         var opt = allOptions.find(function (o) { return o.value === value; });
         if (!opt) return;
 
         var pill = document.createElement('span');
-        pill.className = 'hitalx-pw-pill badge bg-primary';
+        pill.className = 'hitalx-pw-pill';
         pill.dataset.value = value;
 
-        var label = document.createTextNode(opt.label + '\u00a0');
-        pill.appendChild(label);
+        pill.appendChild(document.createTextNode(opt.label));
 
-        var x = document.createElement('button');
-        x.type = 'button';
-        x.className = 'hitalx-pw-pill-remove';
-        x.setAttribute('aria-label', 'Remove ' + opt.label);
-        x.textContent = '\u00d7';
-        x.addEventListener('click', function (e) {
-          e.stopPropagation();
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'hitalx-pw-pill-remove';
+        btn.setAttribute('aria-label', 'Remove ' + opt.label);
+        btn.textContent = '\u00d7';
+        btn.addEventListener('click', function () {
           setSelected(value, false);
           renderPills();
           renderDropdown(searchInput.value);
         });
-        pill.appendChild(x);
-        pillBox.insertBefore(pill, searchInput);
+        pill.appendChild(btn);
+        pillRow.appendChild(pill);
       });
     }
 
@@ -97,9 +92,8 @@
       var selected = selectedValues();
 
       var matches = allOptions.filter(function (o) {
-        if (selected.indexOf(o.value) !== -1) return false; // already a pill
-        if (!q) return true;
-        return o.label.toLowerCase().indexOf(q) !== -1;
+        if (selected.indexOf(o.value) !== -1) return false;
+        return !q || o.label.toLowerCase().indexOf(q) !== -1;
       });
 
       dropdown.innerHTML = '';
@@ -112,7 +106,7 @@
       matches.slice(0, 30).forEach(function (o) {
         var item = document.createElement('div');
         item.className = 'hitalx-pw-item';
-        // Highlight matching portion
+
         if (q) {
           var idx = o.label.toLowerCase().indexOf(q);
           item.appendChild(document.createTextNode(o.label.slice(0, idx)));
@@ -123,8 +117,9 @@
         } else {
           item.textContent = o.label;
         }
+
         item.addEventListener('mousedown', function (e) {
-          e.preventDefault(); // keep focus on input
+          e.preventDefault();
           setSelected(o.value, true);
           searchInput.value = '';
           renderPills();
@@ -137,8 +132,7 @@
       dropdown.style.display = 'block';
     }
 
-    // ── events ─────────────────────────────────────────────────────────────
-
+    /* ── events ── */
     searchInput.addEventListener('input', function () {
       renderDropdown(this.value);
     });
@@ -148,14 +142,12 @@
     });
 
     searchInput.addEventListener('blur', function () {
-      // Short delay so mousedown on a dropdown item fires first
       setTimeout(function () { dropdown.style.display = 'none'; }, 200);
     });
 
     searchInput.addEventListener('keydown', function (e) {
-      // Remove last pill on Backspace when input is empty
       if (e.key === 'Backspace' && this.value === '') {
-        var pills = pillBox.querySelectorAll('.hitalx-pw-pill');
+        var pills = pillRow.querySelectorAll('.hitalx-pw-pill');
         if (pills.length > 0) {
           var last = pills[pills.length - 1];
           setSelected(last.dataset.value, false);
@@ -163,19 +155,12 @@
           renderDropdown('');
         }
       }
-      // Close on Escape
       if (e.key === 'Escape') {
         dropdown.style.display = 'none';
       }
     });
 
-    pillBox.addEventListener('click', function (e) {
-      if (e.target === pillBox || e.target === searchInput) {
-        searchInput.focus();
-      }
-    });
-
-    // ── initial render ─────────────────────────────────────────────────────
+    /* ── initial render ── */
     renderPills();
   }
 
