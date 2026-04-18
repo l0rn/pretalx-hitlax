@@ -1,3 +1,9 @@
+/* Vertical spacing for inline form sections on speaker detail page */
+.hitalx-section {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
 .hitalx-pw-wrapper {
   position: relative;
 }

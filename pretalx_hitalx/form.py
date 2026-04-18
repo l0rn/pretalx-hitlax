@@ -158,7 +158,7 @@ class SpeakerToursInlineForm:
 
     def _render(self):
         if not self.profile:
-            return mark_safe('<p class="text-muted"><em>' + str(_("No tours assigned.")) + '</em></p>')
+            return mark_safe('<div class="hitalx-section"><p class="text-muted"><em>' + str(_("No tours assigned.")) + '</em></p></div>')
 
         field_name = f"{self.prefix}-selected"
         options = ""
@@ -169,7 +169,7 @@ class SpeakerToursInlineForm:
             sel = ' selected' if tour.id in self._current_ids else ''
             options += f'<option value="{tour.id}"{sel}>{label}</option>'
 
-        html = f'<select multiple name="{field_name}" class="hitalx-pw-select">{options}</select>'
+        html = f'<div class="hitalx-section"><select multiple name="{field_name}" class="hitalx-pw-select">{options}</select></div>'
         return mark_safe(html)
 
     def __html__(self):
@@ -251,13 +251,15 @@ class SpeakerExpensesInlineForm:
         rows = ''.join(self._row_html(form) for form in self.formset.forms)
         empty_row = self._row_html(self.formset.empty_form).replace('__prefix__', '{index}')
         html = (
-            str(self.formset.management_form)
+            '<div class="hitalx-section">'
+            + str(self.formset.management_form)
             + '<table class="table table-sm table-hover" id="hitalx-expense-table">'
             + f'<thead><tr><th>{_("Description")}</th><th>{_("Amount")}</th><th>{_("Reference (URL)")}</th><th>{_("Notes")}</th><th>{_("Paid")}</th><th>{_("Delete")}</th></tr></thead>'
             + f'<tbody>{rows}</tbody></table>'
             + f'<button type="button" class="btn btn-sm btn-outline-primary" id="hitalx-add-expense">+ {_("Add expense")}</button>'
             + f'<template id="hitalx-expense-row-template">{empty_row}</template>'
             + '<script defer src="/static/pretalx_hitalx/expenses_inline.js"></script>'
+            + '</div>'
         )
         return mark_safe(html)
 
@@ -522,7 +524,7 @@ class SpeakerAccommodationInlineForm:
         else:
             add_form = f'<p class="text-muted"><em>{_("No accommodations configured for this event yet.")}</em></p>'
 
-        return mark_safe(error_html + table + add_form)
+        return mark_safe('<div class="hitalx-section">' + error_html + table + add_form + '</div>')
 
     def __html__(self):
         return self._render()

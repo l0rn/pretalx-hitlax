@@ -141,11 +141,14 @@ class PluginApp(AppConfig):
 
                 if hasattr(response, "content"):
                     content = response.content
-                    marker = b"</body>"
-                    if marker in content:
-                        response.content = content.replace(
-                            marker, extra_html.encode("utf-8") + marker, 1
-                        )
+                    # Try to inject inside the main container; fall back to </body>
+                    wrapped = '<div class="container">' + extra_html + '</div>'
+                    for marker in (b"</main>", b"</body>"):
+                        if marker in content:
+                            response.content = content.replace(
+                                marker, wrapped.encode("utf-8") + marker, 1
+                            )
+                            break
             except Exception:
                 logger.exception("pretalx_hitalx: CFP dispatch injection failed")
 
