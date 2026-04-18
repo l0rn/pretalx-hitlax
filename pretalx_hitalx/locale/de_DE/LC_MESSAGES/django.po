@@ -315,6 +315,15 @@ msgstr "Das Enddatum muss nach dem Startdatum liegen."
 msgid "%(speaker)s is already booked in %(accommodation)s from %(from)s to %(to)s."
 msgstr "%(speaker)s ist bereits in %(accommodation)s vom %(from)s bis %(to)s gebucht."
 
+msgid "%(accommodation)s is already booked by %(speaker)s from %(from)s to %(to)s."
+msgstr "%(accommodation)s ist bereits von %(speaker)s vom %(from)s bis %(to)s gebucht."
+
+msgid "optional"
+msgstr "optional"
+
+msgid "Not found."
+msgstr "Nicht gefunden."
+
 msgid "No accommodation data available."
 msgstr "Keine Unterkunftsdaten verfügbar."
 
