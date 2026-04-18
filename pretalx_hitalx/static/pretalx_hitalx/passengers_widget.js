@@ -315,22 +315,25 @@
    * appended to <body>, safely outside any existing form.
    */
   function initPostButtons() {
-    document.addEventListener('click', function (e) {
-      var btn = e.target.closest('[data-post-url]');
-      if (!btn) return;
-      e.preventDefault();
-      var url = btn.dataset.postUrl;
-      var csrf = btn.dataset.csrf;
-      var form = document.createElement('form');
-      form.method = 'post';
-      form.action = url;
-      var inp = document.createElement('input');
-      inp.type = 'hidden';
-      inp.name = 'csrfmiddlewaretoken';
-      inp.value = csrf;
-      form.appendChild(inp);
-      document.body.appendChild(form);
-      form.submit();
+    document.querySelectorAll('[data-post-url]').forEach(function (btn) {
+      if (btn.dataset.postInit) return;
+      btn.dataset.postInit = '1';
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var url = btn.dataset.postUrl;
+        var csrf = btn.dataset.csrf;
+        var form = document.createElement('form');
+        form.method = 'post';
+        form.action = url;
+        var inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'csrfmiddlewaretoken';
+        inp.value = csrf;
+        form.appendChild(inp);
+        document.body.appendChild(form);
+        form.submit();
+      });
     });
   }
 
