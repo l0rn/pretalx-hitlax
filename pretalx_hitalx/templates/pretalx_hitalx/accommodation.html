@@ -68,15 +68,12 @@
           <td>{{ booking.to_date }}</td>
           <td>{{ booking.notes }}</td>
           <td>
-            <form method="post"
-                  action="{% url 'plugins:pretalx_hitalx:accommodation.booking.delete' event=request.event.slug pk=booking.pk %}"
-                  style="display:inline">
-              {% csrf_token %}
-              <button type="submit" class="btn btn-sm btn-outline-danger"
-                      onclick="return confirm('{% translate "Delete this booking?" %}')">
-                <i class="fa fa-trash"></i>
-              </button>
-            </form>
+            <button type="button" class="btn btn-sm btn-outline-danger"
+                    data-post-url="{% url 'plugins:pretalx_hitalx:accommodation.booking.delete' event=request.event.slug pk=booking.pk %}"
+                    data-csrf="{{ csrf_token }}"
+                    data-confirm="{% translate "Delete this booking?" %}">
+              <i class="fa fa-trash"></i>
+            </button>
           </td>
         </tr>
         {% endfor %}

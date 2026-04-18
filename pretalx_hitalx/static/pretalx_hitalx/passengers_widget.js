@@ -321,6 +321,8 @@
       btn.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
+        var confirmMsg = btn.dataset.confirm;
+        if (confirmMsg && !window.confirm(confirmMsg)) return;
         var url = btn.dataset.postUrl;
         var csrf = btn.dataset.csrf;
         var form = document.createElement('form');
