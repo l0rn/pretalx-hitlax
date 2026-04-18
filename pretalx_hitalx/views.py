@@ -21,8 +21,10 @@ from pretalx.person.models import SpeakerProfile
 from pretalx.submission.models import Answer, SubmissionStates
 from pretalx.submission.rules import speaker_profiles_for_user
 
-from .form import SpeakerExpenseForm, SpeakerToursForm, TourForm, ShuttleExportPermissionForm
-from .models import ExpenseItem, Tour
+from django_scopes import scope
+
+from .form import SpeakerExpenseForm, SpeakerToursForm, TourForm, ShuttleExportPermissionForm, AccommodationForm, AccommodationBookingForm
+from .models import ExpenseItem, Tour, Accommodation, AccommodationBooking
 
 
 class SpeakerList(EventPermissionRequired, Filterable, ListView):
@@ -390,3 +392,148 @@ class ShuttleView(View):
         else:
             messages.warning(request, gettext('Only people in the team \'shuttle\' can access this page'))
             return redirect(reverse('orga:event.login', kwargs={'event': request.event.slug}))
+
+
+class AccommodationListView(EventPermissionRequired, ListView):
+    template_name = "pretalx_hitalx/accommodations.html"
+    model = Accommodation
+    context_object_name = "accommodations"
+    permission_required = "person.orga_view_speakerprofile"
+
+    def get_queryset(self):
+        return Accommodation.objects.filter(event=self.request.event).annotate(
+            booking_count=Count("bookings")
+        ).order_by("name")
+
+
+class AccommodationDetailView(EventPermissionRequired, CreateOrUpdateView):
+    template_name = "pretalx_hitalx/accommodation.html"
+    model = Accommodation
+    form_class = AccommodationForm
+    permission_required = "person.orga_view_speakerprofile"
+
+    def get_object(self):
+        pk = self.kwargs.get("pk")
+        if pk is None:
+            return None
+        return Accommodation.objects.filter(pk=pk, event=self.request.event).first()
+
+    @cached_property
+    def object(self):
+        return self.get_object()
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        obj.event = self.request.event
+        obj.save()
+        self.object = obj
+        messages.success(self.request, gettext("Accommodation saved."))
+        return HttpResponseRedirect(self.get_success_url())
+
+    def get_success_url(self):
+        return reverse(
+            "plugins:pretalx_hitalx:accommodation.view",
+            kwargs={"event": self.request.event.slug, "pk": self.object.pk},
+        )
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        if self.object:
+            with scope(event=self.request.event):
+                ctx["bookings"] = list(
+                    self.object.bookings.select_related("speaker").order_by("from_date")
+                )
+            ctx["booking_form"] = AccommodationBookingForm(
+                accommodation=self.object,
+                event=self.request.event,
+            )
+        return ctx
+
+
+class AccommodationDeleteView(EventPermissionRequired, DeleteView):
+    permission_required = "person.orga_view_speakerprofile"
+    template_name = "pretalx_hitalx/accommodation_confirm_delete.html"
+
+    def get_object(self):
+        return get_object_or_404(
+            Accommodation.objects.all(), event=self.request.event, pk=self.kwargs.get("pk")
+        )
+
+    def get_success_url(self):
+        return reverse(
+            "plugins:pretalx_hitalx:accommodations.view",
+            kwargs={"event": self.request.event.slug},
+        )
+
+
+class AccommodationBookingCreateView(EventPermissionRequired, View):
+    permission_required = "person.orga_view_speakerprofile"
+
+    def post(self, request, *args, **kwargs):
+        accommodation = get_object_or_404(
+            Accommodation, pk=self.kwargs["pk"], event=request.event
+        )
+        form = AccommodationBookingForm(
+            data=request.POST,
+            accommodation=accommodation,
+            event=request.event,
+        )
+        if form.is_valid():
+            booking = form.save(commit=False)
+            booking.accommodation = accommodation
+            booking.save()
+            messages.success(request, gettext("Booking saved."))
+            return HttpResponseRedirect(
+                reverse(
+                    "plugins:pretalx_hitalx:accommodation.view",
+                    kwargs={"event": request.event.slug, "pk": accommodation.pk},
+                )
+            )
+        # Re-render the detail view with form errors
+        with scope(event=request.event):
+            bookings = list(accommodation.bookings.select_related("speaker").order_by("from_date"))
+        accom_form = AccommodationForm(instance=accommodation)
+        return render(
+            request,
+            "pretalx_hitalx/accommodation.html",
+            {
+                "object": accommodation,
+                "form": accom_form,
+                "bookings": bookings,
+                "booking_form": form,
+                "request": request,
+            },
+        )
+
+    def get_permission_object(self):
+        return get_object_or_404(
+            Accommodation, pk=self.kwargs["pk"], event=self.request.event
+        )
+
+
+class AccommodationBookingDeleteView(EventPermissionRequired, View):
+    permission_required = "person.orga_view_speakerprofile"
+
+    def post(self, request, *args, **kwargs):
+        booking = get_object_or_404(AccommodationBooking, pk=self.kwargs["pk"])
+        # Ensure booking belongs to this event
+        if booking.accommodation.event != request.event:
+            messages.error(request, gettext("Not found."))
+            return HttpResponseRedirect(
+                reverse(
+                    "plugins:pretalx_hitalx:accommodations.view",
+                    kwargs={"event": request.event.slug},
+                )
+            )
+        accommodation_pk = booking.accommodation.pk
+        booking.delete()
+        messages.success(request, gettext("Booking deleted."))
+        referer = request.META.get("HTTP_REFERER")
+        if referer:
+            return HttpResponseRedirect(referer)
+        return HttpResponseRedirect(
+            reverse(
+                "plugins:pretalx_hitalx:accommodation.view",
+                kwargs={"event": request.event.slug, "pk": accommodation_pk},
+            )
+        )

@@ -1,0 +1,32 @@
+{% extends "orga/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Delete Accommodation" %}{% endblock %}
+
+{% block content %}
+  <h2>{% translate "Delete Accommodation" %}</h2>
+
+  <p>{% translate "Do you really want to delete this accommodation?" %}</p>
+  {% if object %}
+  <p><strong>{{ object.name }}</strong>{% if object.accommodation_type %} ({{ object.accommodation_type }}){% endif %}</p>
+  {% endif %}
+
+  <div class="submit-group panel">
+    <span>
+      <a href="{% if object %}{% url 'plugins:pretalx_hitalx:accommodation.view' event=request.event.slug pk=object.pk %}{% else %}{% url 'plugins:pretalx_hitalx:accommodations.view' event=request.event.slug %}{% endif %}"
+         class="btn btn-lg btn-default">
+        <i class="fa fa-arrow-left"></i>
+        {% translate "Back" %}
+      </a>
+    </span>
+    <span>
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-lg btn-danger">
+          <i class="fa fa-trash"></i>
+          {% translate "Yes, delete" %}
+        </button>
+      </form>
+    </span>
+  </div>
+{% endblock %}

@@ -40,3 +40,24 @@ class Tour(models.Model):
 
     def __str__(self):
         return f'{self.type} - {self.description} - {self.start_location} - {self.departure_time}'
+
+
+class Accommodation(models.Model):
+    name = models.CharField(max_length=200)
+    accommodation_type = models.CharField(max_length=100, blank=True, default="")
+    notes = models.TextField(blank=True, default="")
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="accommodations")
+
+    def __str__(self):
+        return self.name
+
+
+class AccommodationBooking(models.Model):
+    accommodation = models.ForeignKey(Accommodation, on_delete=models.CASCADE, related_name="bookings")
+    speaker = models.ForeignKey(User, on_delete=models.CASCADE, related_name="accommodation_bookings")
+    from_date = models.DateField()
+    to_date = models.DateField()
+    notes = models.TextField(blank=True, default="")
+
+    class Meta:
+        ordering = ["from_date"]

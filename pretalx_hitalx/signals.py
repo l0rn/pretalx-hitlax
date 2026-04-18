@@ -42,7 +42,17 @@ def navbar_info(sender, request, **kwargs):
                 'event': request.event.slug,
             }),
             'active': url.namespace == 'plugins:pretalx_hitalx' and url.url_name == 'tours.export',
-        }
+        },
+        {
+            'label': _('Accommodations'),
+            'icon': 'home',
+            'url': reverse('plugins:pretalx_hitalx:accommodations.view', kwargs={
+                'event': request.event.slug,
+            }),
+            'active': url.namespace == 'plugins:pretalx_hitalx' and url.url_name in (
+                'accommodations.view', 'accommodation.view', 'accommodation.create',
+            ),
+        },
     ]
 
 
@@ -60,7 +70,7 @@ def default_activitylog_display(sender, activitylog, **kwargs):
 
 
 
-from .form import SpeakerExpensesInlineForm, SpeakerToursInlineForm
+from .form import SpeakerExpensesInlineForm, SpeakerToursInlineForm, SpeakerAccommodationInlineForm
 
 
 
@@ -86,6 +96,13 @@ def speaker_inline_forms(sender, request, instance, **kwargs):
                 data=data,
                 instance=profile,
                 prefix="hitalx_tours",
+            ),
+            SpeakerAccommodationInlineForm(
+                data=data,
+                speaker=user,
+                event=sender,
+                prefix="hitalx_accom",
+                request=request,
             ),
         ]
 

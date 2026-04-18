@@ -1,0 +1,119 @@
+{% extends "orga/base.html" %}
+{% load i18n %}
+
+{% block title %}
+  {% if object %}
+    {{ object.name }}
+  {% else %}
+    {% translate "New Accommodation" %}
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  <h2>
+    {% if object %}
+      {{ object.name }}
+    {% else %}
+      {% translate "New Accommodation" %}
+    {% endif %}
+  </h2>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    {{ form.name.as_field_group }}
+    {{ form.accommodation_type.as_field_group }}
+    {{ form.notes.as_field_group }}
+
+    <div class="submit-group panel">
+      <span>
+        {% if object %}
+        <a href="{% url 'plugins:pretalx_hitalx:accommodation.delete' event=request.event.slug pk=object.pk %}"
+           class="btn btn-danger">
+          <i class="fa fa-trash"></i> {% translate "Delete" %}
+        </a>
+        {% endif %}
+      </span>
+      <span>
+        <button type="submit" class="btn btn-success btn-lg">
+          <i class="fa fa-check"></i>
+          {% translate "Save" %}
+        </button>
+      </span>
+    </div>
+  </form>
+
+  {% if object %}
+  <hr>
+  <h3>{% translate "Bookings" %}</h3>
+
+  {% if bookings %}
+  <div class="table-responsive">
+    <table class="table table-sm table-hover">
+      <thead>
+        <tr>
+          <th>{% translate "Speaker" %}</th>
+          <th>{% translate "From" %}</th>
+          <th>{% translate "To" %}</th>
+          <th>{% translate "Notes" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+        <tr>
+          <td>{{ booking.speaker.get_display_name }}</td>
+          <td>{{ booking.from_date }}</td>
+          <td>{{ booking.to_date }}</td>
+          <td>{{ booking.notes }}</td>
+          <td>
+            <form method="post"
+                  action="{% url 'plugins:pretalx_hitalx:accommodation.booking.delete' event=request.event.slug pk=booking.pk %}"
+                  style="display:inline">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger"
+                      onclick="return confirm('{% translate "Delete this booking?" %}')">
+                <i class="fa fa-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted"><em>{% translate "No accommodation booked." %}</em></p>
+  {% endif %}
+
+  <h4>{% translate "Add Booking" %}</h4>
+  <form method="post"
+        action="{% url 'plugins:pretalx_hitalx:accommodation.booking.create' event=request.event.slug pk=object.pk %}">
+    {% csrf_token %}
+    {{ booking_form.non_field_errors }}
+
+    <div class="row">
+      <div class="col-md-4">
+        {{ booking_form.speaker.as_field_group }}
+      </div>
+      <div class="col-md-3">
+        {{ booking_form.from_date.as_field_group }}
+      </div>
+      <div class="col-md-3">
+        {{ booking_form.to_date.as_field_group }}
+      </div>
+      <div class="col-md-2 d-flex align-items-end pb-3">
+        <button type="submit" class="btn btn-success w-100">
+          <i class="fa fa-plus"></i> {% translate "Add" %}
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        {{ booking_form.notes.as_field_group }}
+      </div>
+    </div>
+  </form>
+  {% endif %}
+{% endblock %}

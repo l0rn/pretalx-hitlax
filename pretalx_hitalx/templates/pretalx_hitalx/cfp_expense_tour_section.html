@@ -55,4 +55,32 @@
 </div>
 {% endif %}
 
+{% if hitalx_my_accommodation_bookings %}
+<div style="margin-bottom: 2rem;">
+  <h3>{% translate "Your accommodation" %}</h3>
+  <table class="table table-sm table-striped">
+    <thead>
+      <tr>
+        <th>{% translate "Accommodation" %}</th>
+        <th>{% translate "Type" %}</th>
+        <th>{% translate "From" %}</th>
+        <th>{% translate "To" %}</th>
+        <th>{% translate "Notes" %}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for booking in hitalx_my_accommodation_bookings %}
+      <tr>
+        <td>{{ booking.accommodation.name }}</td>
+        <td>{{ booking.accommodation.accommodation_type }}</td>
+        <td>{{ booking.from_date }}</td>
+        <td>{{ booking.to_date }}</td>
+        <td>{{ booking.notes }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
 </section>

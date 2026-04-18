@@ -278,3 +278,75 @@ msgstr "Ungültige Auswahl"
 
 msgid "Start location"
 msgstr "Startort"
+
+msgid "Accommodation"
+msgstr "Unterkunft"
+
+msgid "Accommodations"
+msgstr "Unterkünfte"
+
+msgid "Type (e.g. Room, Tent, Bauwagen)"
+msgstr "Typ (z.B. Zimmer, Zelt, Bauwagen)"
+
+msgid "Add a new Accommodation"
+msgstr "Unterkunft hinzufügen"
+
+msgid "No accommodations yet."
+msgstr "Noch keine Unterkünfte."
+
+msgid "No accommodation booked."
+msgstr "Keine Unterkunft gebucht."
+
+msgid "No accommodations configured for this event yet."
+msgstr "Noch keine Unterkünfte für diese Veranstaltung konfiguriert."
+
+msgid "Accommodation saved."
+msgstr "Unterkunft gespeichert."
+
+msgid "Booking saved."
+msgstr "Buchung gespeichert."
+
+msgid "Booking deleted."
+msgstr "Buchung gelöscht."
+
+msgid "End date must be after start date."
+msgstr "Das Enddatum muss nach dem Startdatum liegen."
+
+msgid "%(speaker)s is already booked in %(accommodation)s from %(from)s to %(to)s."
+msgstr "%(speaker)s ist bereits in %(accommodation)s vom %(from)s bis %(to)s gebucht."
+
+msgid "No accommodation data available."
+msgstr "Keine Unterkunftsdaten verfügbar."
+
+msgid "From"
+msgstr "Von"
+
+msgid "To"
+msgstr "Bis"
+
+msgid "Speaker"
+msgstr "Speaker"
+
+msgid "Add"
+msgstr "Hinzufügen"
+
+msgid "Your accommodation"
+msgstr "Deine Unterkunft"
+
+msgid "Add Booking"
+msgstr "Buchung hinzufügen"
+
+msgid "Delete Accommodation"
+msgstr "Unterkunft löschen"
+
+msgid "Do you really want to delete this accommodation?"
+msgstr "Willst du diese Unterkunft wirklich löschen?"
+
+msgid "Delete this booking?"
+msgstr "Diese Buchung löschen?"
+
+msgid "New Accommodation"
+msgstr "Neue Unterkunft"
+
+msgid "Bookings"
+msgstr "Buchungen"

@@ -1,0 +1,60 @@
+{% extends "orga/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Accommodations" %}{% endblock %}
+
+{% block content %}
+  <h2>{% translate "Accommodations" %}</h2>
+
+  <div class="submit-group">
+    <span></span>
+    <span>
+      <a href="{% url 'plugins:pretalx_hitalx:accommodation.create' event=request.event.slug %}" class="btn btn-success">
+        <i class="fa fa-plus"></i>
+        {% translate "Add a new Accommodation" %}
+      </a>
+    </span>
+  </div>
+
+  {% if accommodations %}
+  <div class="table-responsive">
+    <table class="table table-sm table-hover table-flip">
+      <thead>
+        <tr>
+          <th>{% translate "Name" %}</th>
+          <th>{% translate "Type" %}</th>
+          <th>{% translate "Notes" %}</th>
+          <th>{% translate "Bookings" %}</th>
+          <th>{% translate "Actions" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for accommodation in accommodations %}
+        <tr>
+          <td>
+            <a href="{% url 'plugins:pretalx_hitalx:accommodation.view' event=request.event.slug pk=accommodation.pk %}">
+              {{ accommodation.name }}
+            </a>
+          </td>
+          <td>{{ accommodation.accommodation_type }}</td>
+          <td>{{ accommodation.notes }}</td>
+          <td>{{ accommodation.booking_count }}</td>
+          <td class="action-column">
+            <a href="{% url 'plugins:pretalx_hitalx:accommodation.view' event=request.event.slug pk=accommodation.pk %}"
+               class="btn btn-sm btn-info" title="{% translate "Edit" %}">
+              <i class="fa fa-edit"></i>
+            </a>
+            <a href="{% url 'plugins:pretalx_hitalx:accommodation.delete' event=request.event.slug pk=accommodation.pk %}"
+               class="btn btn-sm btn-danger" title="{% translate "Delete" %}">
+              <i class="fa fa-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted"><em>{% translate "No accommodations yet." %}</em></p>
+  {% endif %}
+{% endblock %}

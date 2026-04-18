@@ -11,7 +11,12 @@ from .views import (
     TourDetailView,
     TourDeleteView,
     ShuttleView,
-    ShuttleExportSettingsView
+    ShuttleExportSettingsView,
+    AccommodationListView,
+    AccommodationDetailView,
+    AccommodationDeleteView,
+    AccommodationBookingCreateView,
+    AccommodationBookingDeleteView,
 )
 
 urlpatterns = [
@@ -79,5 +84,36 @@ urlpatterns = [
         "orga/event/<slug:event>/speakers/<int:speaker_id>/expense/<int:pk>/delete",
         view=DeleteExpenseView.as_view(),
         name="expense.delete",
+    ),
+    # Accommodations
+    path(
+        "orga/event/<slug:event>/accommodations/",
+        view=AccommodationListView.as_view(),
+        name="accommodations.view",
+    ),
+    path(
+        "orga/event/<slug:event>/accommodations/new",
+        view=AccommodationDetailView.as_view(),
+        name="accommodation.create",
+    ),
+    path(
+        "orga/event/<slug:event>/accommodations/<int:pk>/",
+        view=AccommodationDetailView.as_view(),
+        name="accommodation.view",
+    ),
+    path(
+        "orga/event/<slug:event>/accommodations/<int:pk>/delete",
+        view=AccommodationDeleteView.as_view(),
+        name="accommodation.delete",
+    ),
+    path(
+        "orga/event/<slug:event>/accommodations/<int:pk>/booking/new",
+        view=AccommodationBookingCreateView.as_view(),
+        name="accommodation.booking.create",
+    ),
+    path(
+        "orga/event/<slug:event>/accommodation-booking/<int:pk>/delete",
+        view=AccommodationBookingDeleteView.as_view(),
+        name="accommodation.booking.delete",
     ),
 ]

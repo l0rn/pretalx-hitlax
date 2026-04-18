@@ -112,15 +112,26 @@ class PluginApp(AppConfig):
                     except Exception:
                         return response
 
+                    from .models import AccommodationBooking
                     expenses = list(request.user.expenses.all().order_by("description"))
                     tours = list(profile.tours.all().order_by("departure_time"))
+                    accom_bookings = list(
+                        AccommodationBooking.objects.filter(
+                            speaker=request.user,
+                            accommodation__event=event,
+                        ).select_related("accommodation").order_by("from_date")
+                    )
 
-                if not expenses and not tours:
+                if not expenses and not tours and not accom_bookings:
                     return response
 
                 extra_html = render_to_string(
                     "pretalx_hitalx/cfp_expense_tour_section.html",
-                    {"hitalx_my_expenses": expenses, "hitalx_my_tours": tours},
+                    {
+                        "hitalx_my_expenses": expenses,
+                        "hitalx_my_tours": tours,
+                        "hitalx_my_accommodation_bookings": accom_bookings,
+                    },
                     request=request,
                 )
 
