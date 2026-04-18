@@ -189,17 +189,125 @@
     document.querySelectorAll('.hitalx-pw-select').forEach(initOne);
   }
 
-  /* ── Choices.js autocomplete for single speaker select ── */
-  function initSpeakerChoices() {
-    var sel = document.getElementById('id_speaker');
-    if (sel && typeof Choices !== 'undefined') {
-      new Choices(sel, {
-        searchEnabled: true,
-        itemSelectText: '',
-        shouldSort: false,
-        allowHTML: false,
-      });
+  /* ── Single-select autocomplete for <select class="hitalx-ss-select"> ── */
+  function initSingleSelect(sel) {
+    if (sel.dataset.ssInit) return;
+    sel.dataset.ssInit = '1';
+
+    var allOptions = Array.from(sel.options)
+      .filter(function (o) { return o.value !== ''; })
+      .map(function (o) { return { value: o.value, label: o.text.trim() }; });
+
+    sel.style.display = 'none';
+
+    var wrapper = document.createElement('div');
+    wrapper.className = 'hitalx-pw-wrapper';
+    sel.parentNode.insertBefore(wrapper, sel);
+
+    var inputRow = document.createElement('div');
+    inputRow.className = 'hitalx-pw-input-row';
+    wrapper.appendChild(inputRow);
+
+    var searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.className = 'form-control';
+    searchInput.placeholder = 'Search\u2026';
+    searchInput.autocomplete = 'off';
+    searchInput.spellcheck = false;
+    inputRow.appendChild(searchInput);
+
+    var dropdown = document.createElement('div');
+    dropdown.className = 'hitalx-pw-dropdown';
+    dropdown.style.display = 'none';
+    inputRow.appendChild(dropdown);
+
+    var pillRow = document.createElement('div');
+    pillRow.className = 'hitalx-pw-pills';
+    wrapper.appendChild(pillRow);
+
+    function getSelected() {
+      return sel.value ? allOptions.find(function (o) { return o.value === sel.value; }) : null;
     }
+
+    function clearSelection() {
+      sel.value = '';
+      searchInput.value = '';
+      searchInput.style.display = '';
+      renderPill();
+    }
+
+    function renderPill() {
+      pillRow.innerHTML = '';
+      var chosen = getSelected();
+      if (!chosen) return;
+
+      searchInput.style.display = 'none';
+
+      var pill = document.createElement('span');
+      pill.className = 'hitalx-pw-pill';
+
+      pill.appendChild(document.createTextNode(chosen.label));
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'hitalx-pw-pill-remove';
+      btn.textContent = '\u00d7';
+      btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      btn.addEventListener('click', clearSelection);
+      pill.appendChild(btn);
+      pillRow.appendChild(pill);
+    }
+
+    function renderDropdown(query) {
+      var q = (query || '').toLowerCase().trim();
+      var matches = allOptions.filter(function (o) {
+        return !q || o.label.toLowerCase().indexOf(q) !== -1;
+      });
+
+      dropdown.innerHTML = '';
+      if (matches.length === 0) { dropdown.style.display = 'none'; return; }
+
+      matches.slice(0, 30).forEach(function (o) {
+        var item = document.createElement('div');
+        item.className = 'hitalx-pw-item';
+
+        if (q) {
+          var idx = o.label.toLowerCase().indexOf(q);
+          item.appendChild(document.createTextNode(o.label.slice(0, idx)));
+          var mark = document.createElement('mark');
+          mark.textContent = o.label.slice(idx, idx + q.length);
+          item.appendChild(mark);
+          item.appendChild(document.createTextNode(o.label.slice(idx + q.length)));
+        } else {
+          item.textContent = o.label;
+        }
+
+        item.addEventListener('mousedown', function (e) {
+          e.preventDefault();
+          sel.value = o.value;
+          searchInput.value = '';
+          dropdown.style.display = 'none';
+          renderPill();
+        });
+        dropdown.appendChild(item);
+      });
+      dropdown.style.display = 'block';
+    }
+
+    searchInput.addEventListener('input', function () { renderDropdown(this.value); });
+    searchInput.addEventListener('focus', function () { renderDropdown(this.value); });
+    searchInput.addEventListener('blur', function () { setTimeout(function () { dropdown.style.display = 'none'; }, 200); });
+    searchInput.addEventListener('keydown', function (e) { if (e.key === 'Escape') dropdown.style.display = 'none'; });
+
+    document.addEventListener('mousedown', function (e) {
+      if (!wrapper.contains(e.target)) dropdown.style.display = 'none';
+    }, true);
+
+    renderPill();
+  }
+
+  function initAllSingleSelects() {
+    document.querySelectorAll('.hitalx-ss-select').forEach(initSingleSelect);
   }
 
   /* ── POST-button handler (avoids nested <form> elements) ──
@@ -229,12 +337,12 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
       initAll();
-      initSpeakerChoices();
+      initAllSingleSelects();
       initPostButtons();
     });
   } else {
     initAll();
-    initSpeakerChoices();
+    initAllSingleSelects();
     initPostButtons();
   }
 })();
