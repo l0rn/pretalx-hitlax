@@ -297,7 +297,7 @@ class AccommodationBookingForm(ModelForm):
     speaker = forms.ModelChoiceField(
         queryset=User.objects.none(),
         label=_("Speaker"),
-        widget=forms.Select(attrs={"class": "form-control"}),
+        widget=forms.Select(attrs={"class": "select2", "data-placeholder": "—"}),
     )
 
     def __init__(self, *args, accommodation=None, event=None, **kwargs):
@@ -349,7 +349,7 @@ class AccommodationBookingForm(ModelForm):
         widgets = {
             "from_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
             "to_date": forms.DateInput(attrs={"type": "date", "class": "form-control"}),
-            "notes": forms.TextInput(attrs={"class": "form-control"}),
+            "notes": forms.Textarea(attrs={"class": "form-control", "rows": 2}),
         }
 
 
