@@ -297,7 +297,7 @@ class AccommodationBookingForm(ModelForm):
     speaker = forms.ModelChoiceField(
         queryset=User.objects.none(),
         label=_("Speaker"),
-        widget=forms.Select(attrs={"class": "select2", "data-placeholder": "—"}),
+        widget=forms.Select(attrs={"class": "form-control"}),
     )
 
     def __init__(self, *args, accommodation=None, event=None, **kwargs):
