@@ -320,20 +320,23 @@ class AccommodationBookingForm(ModelForm):
             if to_date < from_date:
                 raise forms.ValidationError(_("End date must be after start date."))
 
-            if speaker:
+            if self.accommodation:
+                # Check accommodation-level conflict: same accommodation, overlapping nights.
+                # Two bookings overlap iff new.from < existing.to AND existing.from < new.to
+                # (strict inequalities so adjacent 28→29 + 29→30 are allowed).
                 qs = AccommodationBooking.objects.filter(
-                    speaker=speaker,
-                    from_date__lte=to_date,
-                    to_date__gte=from_date,
+                    accommodation=self.accommodation,
+                    from_date__lt=to_date,
+                    to_date__gt=from_date,
                 )
                 if self.instance and self.instance.pk:
                     qs = qs.exclude(pk=self.instance.pk)
-                conflict = qs.select_related("accommodation").first()
+                conflict = qs.select_related("speaker").first()
                 if conflict:
                     raise forms.ValidationError(
-                        _("%(speaker)s is already booked in %(accommodation)s from %(from)s to %(to)s.") % {
-                            "speaker": speaker.get_display_name(),
-                            "accommodation": conflict.accommodation.name,
+                        _("%(accommodation)s is already booked by %(speaker)s from %(from)s to %(to)s.") % {
+                            "accommodation": self.accommodation.name,
+                            "speaker": conflict.speaker.get_display_name(),
                             "from": conflict.from_date,
                             "to": conflict.to_date,
                         }
@@ -397,21 +400,21 @@ class SpeakerAccommodationInlineForm:
             from_date = date_type.fromisoformat(self.data.get(f"{self.prefix}-from_date", ""))
             to_date = date_type.fromisoformat(self.data.get(f"{self.prefix}-to_date", ""))
 
-            if to_date < from_date:
+            if to_date <= from_date:
                 errors.append(str(_("End date must be after start date.")))
             else:
+                # Check accommodation-level conflict: strict overlap so adjacent nights are allowed
                 conflicts = AccommodationBooking.objects.filter(
-                    speaker=self.speaker,
-                    accommodation__event=self.event,
-                    from_date__lte=to_date,
-                    to_date__gte=from_date,
+                    accommodation=accom,
+                    from_date__lt=to_date,
+                    to_date__gt=from_date,
                 )
                 if conflicts.exists():
-                    c = conflicts.first()
+                    c = conflicts.select_related("speaker").first()
                     errors.append(
-                        str(_("%(speaker)s is already booked in %(accommodation)s from %(from)s to %(to)s.")) % {
-                            "speaker": self.speaker.get_display_name(),
-                            "accommodation": c.accommodation.name,
+                        str(_("%(accommodation)s is already booked by %(speaker)s from %(from)s to %(to)s.")) % {
+                            "accommodation": accom.name,
+                            "speaker": c.speaker.get_display_name(),
                             "from": c.from_date,
                             "to": c.to_date,
                         }
