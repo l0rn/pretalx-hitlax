@@ -189,9 +189,52 @@
     document.querySelectorAll('.hitalx-pw-select').forEach(initOne);
   }
 
+  /* ── Choices.js autocomplete for single speaker select ── */
+  function initSpeakerChoices() {
+    var sel = document.getElementById('id_speaker');
+    if (sel && typeof Choices !== 'undefined') {
+      new Choices(sel, {
+        searchEnabled: true,
+        itemSelectText: '',
+        shouldSort: false,
+        allowHTML: false,
+      });
+    }
+  }
+
+  /* ── POST-button handler (avoids nested <form> elements) ──
+   * Buttons with data-post-url submit a dynamically created form
+   * appended to <body>, safely outside any existing form.
+   */
+  function initPostButtons() {
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-post-url]');
+      if (!btn) return;
+      e.preventDefault();
+      var url = btn.dataset.postUrl;
+      var csrf = btn.dataset.csrf;
+      var form = document.createElement('form');
+      form.method = 'post';
+      form.action = url;
+      var inp = document.createElement('input');
+      inp.type = 'hidden';
+      inp.name = 'csrfmiddlewaretoken';
+      inp.value = csrf;
+      form.appendChild(inp);
+      document.body.appendChild(form);
+      form.submit();
+    });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initAll);
+    document.addEventListener('DOMContentLoaded', function () {
+      initAll();
+      initSpeakerChoices();
+      initPostButtons();
+    });
   } else {
     initAll();
+    initSpeakerChoices();
+    initPostButtons();
   }
 })();

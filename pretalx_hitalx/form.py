@@ -481,10 +481,9 @@ class SpeakerAccommodationInlineForm:
                     f"<td>{b.from_date}</td>"
                     f"<td>{b.to_date}</td>"
                     f"<td>{b.notes}</td>"
-                    f'<td><form method="post" action="{delete_url}" style="display:inline">'
-                    f'<input type="hidden" name="csrfmiddlewaretoken" value="{csrf}">'
-                    f'<button class="btn btn-sm btn-outline-danger" type="submit"><i class="fa fa-trash"></i></button>'
-                    f"</form></td>"
+                    f'<td><button type="button" class="btn btn-sm btn-outline-danger" '
+                    f'data-post-url="{delete_url}" data-csrf="{csrf}">'
+                    f'<i class="fa fa-trash"></i></button></td>'
                     f"</tr>"
                 )
             table = (
