@@ -53,13 +53,15 @@ class SpeakerList(EventPermissionRequired, Filterable, ListView):
             .select_related("event", "user")
             .annotate(
                 submission_count=Count(
-                    "user__submissions",
-                    filter=Q(user__submissions__event=self.request.event),
+                    "submissions",
+                    filter=Q(submissions__event=self.request.event),
+                    distinct=True,
                 ),
                 accepted_submission_count=Count(
-                    "user__submissions",
-                    filter=Q(user__submissions__event=self.request.event)
-                           & Q(user__submissions__state__in=["accepted", "confirmed"]),
+                    "submissions",
+                    filter=Q(submissions__event=self.request.event)
+                           & Q(submissions__state__in=["accepted", "confirmed"]),
+                    distinct=True,
                 ),
             )
         )
@@ -68,7 +70,7 @@ class SpeakerList(EventPermissionRequired, Filterable, ListView):
         if "role" in self.request.GET:
             if self.request.GET["role"] == "true":
                 qs = qs.filter(
-                    user__submissions__in=self.request.event.submissions.filter(
+                    submissions__in=self.request.event.submissions.filter(
                         state__in=[
                             SubmissionStates.ACCEPTED,
                             SubmissionStates.CONFIRMED,
@@ -77,7 +79,7 @@ class SpeakerList(EventPermissionRequired, Filterable, ListView):
                 )
             elif self.request.GET["role"] == "false":
                 qs = qs.exclude(
-                    user__submissions__in=self.request.event.submissions.filter(
+                    submissions__in=self.request.event.submissions.filter(
                         state__in=[
                             SubmissionStates.ACCEPTED,
                             SubmissionStates.CONFIRMED,
