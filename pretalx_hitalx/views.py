@@ -19,7 +19,7 @@ from pretalx.event.models import Event
 from pretalx.person.forms import SpeakerFilterForm
 from pretalx.person.models import SpeakerProfile
 from pretalx.submission.models import Answer, SubmissionStates
-from pretalx.submission.rules import speaker_profiles_for_user
+from pretalx.submission.rules import speakers_for_user
 
 from django_scopes import scope
 
@@ -49,7 +49,7 @@ class SpeakerList(EventPermissionRequired, Filterable, ListView):
 
     def get_queryset(self):
         qs = (
-            speaker_profiles_for_user(self.request.event, self.request.user)
+            speakers_for_user(self.request.event, self.request.user)
             .select_related("event", "user")
             .annotate(
                 submission_count=Count(
