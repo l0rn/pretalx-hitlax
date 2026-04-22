@@ -272,11 +272,21 @@ class SpeakerExpensesInlineForm:
 
 
 class ShuttleExportPermissionForm(forms.Form):
-    team_names = forms.CharField(
-        label=_("Allowed teams"),
-        help_text=_("Comma-separated team names that may access the tours export (e.g. shuttle, crew)."),
+    teams = forms.MultipleChoiceField(
+        label=_("Teams with tour export access"),
+        help_text=_("Select which teams may access the tours export page. Event admins always have access."),
+        widget=forms.CheckboxSelectMultiple,
         required=False,
+        choices=[],
     )
+
+    def __init__(self, *args, event=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        if event:
+            self.fields["teams"].choices = [
+                (str(t.pk), t.name)
+                for t in event.teams.all().order_by("name")
+            ]
 
 
 class AccommodationForm(ModelForm):

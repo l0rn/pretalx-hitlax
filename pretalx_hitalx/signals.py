@@ -109,7 +109,7 @@ def speaker_inline_forms(sender, request, instance, **kwargs):
 @receiver(nav_event_settings, dispatch_uid="hitalx_nav_settings")
 def hitalx_settings_nav(sender, request, **kwargs):
     return [{
-        "label": _("Shuttle export permissions"),
+        "label": _("Tour export permissions"),
         "url": reverse("plugins:pretalx_hitalx:tours.export.settings", kwargs={"event": request.event.slug}),
         "active": request.path_info.endswith('/settings/plugins/hitalx/shuttle-export/'),
     }]

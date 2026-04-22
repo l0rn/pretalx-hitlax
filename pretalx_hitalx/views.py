@@ -369,31 +369,50 @@ class ShuttleExportSettingsView(EventPermissionRequired, FormView):
     form_class = ShuttleExportPermissionForm
     permission_required = "event.update_event"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["event"] = self.request.event
+        return kwargs
+
     def get_initial(self):
-        value = self.request.event.settings.get("hitalx_shuttle_export_teams", "shuttle")
-        return {"team_names": value}
+        stored = self.request.event.settings.get("hitalx_tour_export_team_ids", "")
+        team_ids = [t.strip() for t in stored.split(",") if t.strip()]
+        return {"teams": team_ids}
 
     def form_valid(self, form):
-        raw = form.cleaned_data.get("team_names", "")
-        teams = [t.strip() for t in raw.split(",") if t.strip()]
-        value = ", ".join(teams)
-        self.request.event.settings.set("hitalx_shuttle_export_teams", value)
-        messages.success(self.request, gettext("Shuttle export permissions updated."))
+        team_ids = form.cleaned_data.get("teams", [])
+        self.request.event.settings.set("hitalx_tour_export_team_ids", ",".join(team_ids))
+        messages.success(self.request, gettext("Tour export permissions updated."))
         return HttpResponseRedirect(self.get_success_url())
 
     def get_success_url(self):
         return reverse("plugins:pretalx_hitalx:tours.export.settings", kwargs={"event": self.request.event.slug})
 
 
+def _user_can_view_tour_export(user, event):
+    """Return True if the user has the 'tour export' privilege for this event."""
+    # Event admins (any team with can_change_event_settings) always have access
+    if user.teams.filter(organiser=event.organiser, can_change_event_settings=True).exists():
+        return True
+
+    # Check configured team IDs
+    stored = event.settings.get("hitalx_tour_export_team_ids", "")
+    permitted_ids = {t.strip() for t in stored.split(",") if t.strip()}
+    if not permitted_ids:
+        return False
+    return user.teams.filter(organiser=event.organiser, pk__in=permitted_ids).exists()
+
+
 class ShuttleView(View):
     def get(self, request, **kwargs):
-        if request.user.teams.filter(name='shuttle').exists():
-            return render(request, 'pretalx_hitalx/tours_export.html', {
-                'tours': Tour.objects.filter(event=request.event).order_by('departure_time')
-            })
-        else:
-            messages.warning(request, gettext('Only people in the team \'shuttle\' can access this page'))
-            return redirect(reverse('orga:event.login', kwargs={'event': request.event.slug}))
+        if not request.user.is_authenticated:
+            return redirect(reverse("orga:event.login", kwargs={"event": request.event.slug}))
+        if not _user_can_view_tour_export(request.user, request.event):
+            messages.warning(request, gettext("You do not have permission to access the tour export."))
+            return redirect(reverse("orga:event.dashboard", kwargs={"event": request.event.slug}))
+        return render(request, "pretalx_hitalx/tours_export.html", {
+            "tours": Tour.objects.filter(event=request.event).order_by("departure_time"),
+        })
 
 
 class AccommodationListView(EventPermissionRequired, ListView):

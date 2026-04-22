@@ -359,3 +359,18 @@ msgstr "Neue Unterkunft"
 
 msgid "Bookings"
 msgstr "Buchungen"
+
+msgid "Teams with tour export access"
+msgstr "Teams mit Zugang zum Touren-Export"
+
+msgid "Select which teams can access the tours export page. Event admins always have access regardless of this setting."
+msgstr "Wähle aus, welche Teams die Touren-Exportseite sehen dürfen. Event-Admins haben unabhängig von dieser Einstellung immer Zugang."
+
+msgid "Tour export permissions"
+msgstr "Touren-Export-Berechtigungen"
+
+msgid "Tour export permissions updated."
+msgstr "Touren-Export-Berechtigungen aktualisiert."
+
+msgid "You do not have permission to access the tour export."
+msgstr "Du hast keine Berechtigung für den Touren-Export."
