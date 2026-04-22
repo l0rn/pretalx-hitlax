@@ -307,7 +307,7 @@ class AccommodationBookingForm(ModelForm):
         if event:
             with scope(event=event):
                 self.fields["speaker"].queryset = User.objects.filter(
-                    submissions__event=event
+                    profiles__event=event
                 ).distinct().order_by("name")
 
     def clean(self):
