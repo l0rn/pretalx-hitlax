@@ -148,7 +148,8 @@ class SpeakerToursInlineForm:
 
     @property
     def errors(self):
-        return self._errors
+        # Return flat list of strings so FormSignalMixin can do f.errors[0]
+        return [msg for errs in self._errors.values() for msg in errs]
 
     def save(self):
         if not self.profile or self._selected_ids is None:
@@ -210,7 +211,12 @@ class SpeakerExpensesInlineForm:
 
     @property
     def errors(self):
-        return self.formset.errors
+        # Return flat list of strings so FormSignalMixin can do f.errors[0]
+        result = []
+        for form_errors in self.formset.errors:
+            for field_errors in form_errors.values():
+                result.extend(str(e) for e in field_errors)
+        return result
 
     def save(self):
         # Delete marked forms first
@@ -449,7 +455,8 @@ class SpeakerAccommodationInlineForm:
 
     @property
     def errors(self):
-        return self._errors
+        # Return flat list of strings so FormSignalMixin can do f.errors[0]
+        return [msg for errs in self._errors.values() for msg in errs]
 
     def save(self):
         if not self._new_booking:
