@@ -14,42 +14,41 @@ from pretalx.submission.models import SubmissionStates
 
 @receiver(nav_event, dispatch_uid="hitalx_nav")
 def navbar_info(sender, request, **kwargs):
-    url = resolve(request.path_info)
+    try:
+        url = resolve(request.path_info)
+        ns = url.namespace
+        name = url.url_name
+    except Exception:
+        ns = ''
+        name = ''
+
     return [
         {
             "label": _("Speaker expenses"),
             "icon": "dollar",
             "url": reverse(
                 "plugins:pretalx_hitalx:speakers_by_expense.view",
-                kwargs={
-                    "event": request.event.slug,
-                },
+                kwargs={"event": request.event.slug},
             ),
-            "active": url.namespace == "plugins:pretalx_hitalx" and url.url_name == "speakers_by_expense.view",
+            "active": ns == "plugins:pretalx_hitalx" and name == "speakers_by_expense.view",
         },
         {
             'label': _('Tours'),
             'icon': 'bus',
-            'url': reverse('plugins:pretalx_hitalx:tours.view', kwargs={
-                'event': request.event.slug,
-            }),
-            'active': url.namespace == 'plugins:pretalx_hitalx' and url.url_name == 'tours.view',
+            'url': reverse('plugins:pretalx_hitalx:tours.view', kwargs={'event': request.event.slug}),
+            'active': ns == 'plugins:pretalx_hitalx' and name == 'tours.view',
         },
         {
             'label': _('Tours export'),
             'icon': 'bus',
-            'url': reverse('plugins:pretalx_hitalx:tours.export', kwargs={
-                'event': request.event.slug,
-            }),
-            'active': url.namespace == 'plugins:pretalx_hitalx' and url.url_name == 'tours.export',
+            'url': reverse('plugins:pretalx_hitalx:tours.export', kwargs={'event': request.event.slug}),
+            'active': ns == 'plugins:pretalx_hitalx' and name == 'tours.export',
         },
         {
             'label': _('Accommodations'),
             'icon': 'home',
-            'url': reverse('plugins:pretalx_hitalx:accommodations.view', kwargs={
-                'event': request.event.slug,
-            }),
-            'active': url.namespace == 'plugins:pretalx_hitalx' and url.url_name in (
+            'url': reverse('plugins:pretalx_hitalx:accommodations.view', kwargs={'event': request.event.slug}),
+            'active': ns == 'plugins:pretalx_hitalx' and name in (
                 'accommodations.view', 'accommodation.view', 'accommodation.create',
             ),
         },
