@@ -82,3 +82,35 @@ form > fieldset + fieldset {
   padding: 0;
   font-weight: bold;
 }
+
+/* Seat-count section inside a passenger pill */
+.hitalx-pw-seats {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.hitalx-pw-seats-times {
+  opacity: 0.8;
+  font-size: 0.9em;
+}
+
+.hitalx-pw-seats-input {
+  width: 3rem;
+  padding: 0 4px;
+  font-size: 0.85em;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+.hitalx-pw-seats-input::-webkit-inner-spin-button,
+.hitalx-pw-seats-input::-webkit-outer-spin-button {
+  opacity: 0.6;
+}
+.hitalx-pw-seats-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.4);
+}

@@ -24,7 +24,7 @@ from pretalx.submission.rules import speakers_for_user
 from django_scopes import scope
 
 from .form import SpeakerExpenseForm, SpeakerToursForm, TourForm, ShuttleExportPermissionForm, AccommodationForm, AccommodationBookingForm
-from .models import ExpenseItem, Tour, Accommodation, AccommodationBooking
+from .models import ExpenseItem, Tour, TourPassenger, Accommodation, AccommodationBooking
 
 
 class SpeakerList(EventPermissionRequired, Filterable, ListView):
@@ -338,6 +338,17 @@ class TourDetailView(EventPermissionRequired, CreateOrUpdateView):
     def object(self):
         return self.get_object()
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        if self.object and self.object.pk:
+            ctx["passenger_seats"] = {
+                tp.speaker_id: tp.seats
+                for tp in TourPassenger.objects.filter(tour=self.object)
+            }
+        else:
+            ctx["passenger_seats"] = {}
+        return ctx
+
     def get_success_url(self) -> str:
         return reverse(
             "plugins:pretalx_hitalx:tours.view",
@@ -411,7 +422,9 @@ class ShuttleView(View):
             messages.warning(request, gettext("You do not have permission to access the tour export."))
             return redirect(reverse("orga:event.dashboard", kwargs={"event": request.event.slug}))
         return render(request, "pretalx_hitalx/tours_export.html", {
-            "tours": Tour.objects.filter(event=request.event).order_by("departure_time"),
+            "tours": Tour.objects.filter(event=request.event).prefetch_related(
+                "tour_passengers__speaker__user"
+            ).order_by("departure_time"),
         })
 
 

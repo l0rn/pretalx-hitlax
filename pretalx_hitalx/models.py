@@ -34,12 +34,21 @@ class Tour(models.Model):
     departure_time = models.DateTimeField(null=False, blank=False)
     start_location = models.TextField(null=False, blank=False)
     notes = models.TextField(blank=True, default="")
-    passengers = models.ManyToManyField(SpeakerProfile, related_name='tours')
+    passengers = models.ManyToManyField(SpeakerProfile, through='TourPassenger', related_name='tours')
     type = models.TextField(choices=TOUR_TYPE_CHOICES)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.type} - {self.description} - {self.start_location} - {self.departure_time}'
+
+
+class TourPassenger(models.Model):
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='tour_passengers')
+    speaker = models.ForeignKey(SpeakerProfile, on_delete=models.CASCADE, related_name='tour_passengers')
+    seats = models.PositiveSmallIntegerField(default=1)
+
+    class Meta:
+        unique_together = ('tour', 'speaker')
 
 
 class Accommodation(models.Model):

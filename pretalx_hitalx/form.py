@@ -13,7 +13,7 @@ from pretalx.common.forms.mixins import ReadOnlyFlag
 from pretalx.event.models import Event
 from pretalx.person.models import SpeakerProfile, User
 
-from .models import ExpenseItem, Tour, Accommodation, AccommodationBooking
+from .models import ExpenseItem, Tour, TourPassenger, Accommodation, AccommodationBooking
 
 
 class SpeakerExpenseForm(ReadOnlyFlag, ModelForm):
@@ -45,9 +45,17 @@ class SpeakerToursForm(ModelForm):
     )
 
     def save(self, *args, **kwargs):
-        instance = self.instance
+        instance = self.instance  # SpeakerProfile
         if "tours" in self.changed_data:
-            instance.tours.set(self.cleaned_data["tours"])
+            selected_tours = self.cleaned_data["tours"]
+            selected_ids = {t.pk for t in selected_tours}
+            # Remove deselected
+            TourPassenger.objects.filter(speaker=instance).exclude(tour_id__in=selected_ids).delete()
+            # Add newly selected (default seats=1)
+            for tour in selected_tours:
+                TourPassenger.objects.get_or_create(
+                    tour=tour, speaker=instance, defaults={"seats": 1}
+                )
         return instance
 
     def __init__(self, *args, **kwargs):
@@ -86,15 +94,52 @@ class TourForm(ModelForm):
 
     def __init__(self, *args, user=None, locales=None, organiser=None, **kwargs):
         initial = kwargs.get("initial", {}) or {}
+        data = args[0] if args else kwargs.get("data")
         super().__init__(*args, **kwargs)
         event_id = initial.get("event") or getattr(self.instance, "event_id", None)
         if event_id:
             with scope(event=Event.objects.get(id=event_id)):
                 self.fields["passengers"].queryset = SpeakerProfile.objects.all().order_by("user__name")
 
+        # Pre-populate passengers from existing through model records
+        if self.instance and self.instance.pk:
+            self.initial["passengers"] = list(self.instance.passengers.all())
+
+        # Parse seat values submitted via hitalx-seats-{profile_id} POST keys
+        self._seats = {}
+        if data:
+            for key in data:
+                if key.startswith("hitalx-seats-"):
+                    try:
+                        profile_id = int(key[len("hitalx-seats-"):])
+                        val = data[key]
+                        self._seats[profile_id] = max(1, int(val))
+                    except (ValueError, TypeError):
+                        pass
+
+    def save(self, commit=True):
+        instance = super().save(commit=commit)
+        if commit and hasattr(self, "cleaned_data"):
+            selected = self.cleaned_data.get("passengers") or []
+            selected_ids = {p.pk for p in selected}
+            # Remove passengers no longer on the list
+            TourPassenger.objects.filter(tour=instance).exclude(speaker_id__in=selected_ids).delete()
+            # Create or update with seat count
+            for profile in selected:
+                seats = self._seats.get(profile.pk, 1)
+                TourPassenger.objects.update_or_create(
+                    tour=instance,
+                    speaker=profile,
+                    defaults={"seats": seats},
+                )
+        return instance
+
     class Meta:
         model = Tour
-        fields = ["description", "departure_time", "start_location", "notes", "type", "event", "passengers"]
+        # Note: 'passengers' is intentionally omitted here so Django's save_m2m()
+        # doesn't try to use the through model's M2M manager directly.
+        # We handle it manually in save() above.
+        fields = ["description", "departure_time", "start_location", "notes", "type", "event"]
         labels = {
             "start_location": _("Start location"),
             "notes": _("Notes"),
@@ -102,9 +147,6 @@ class TourForm(ModelForm):
         widgets = {
             'event': forms.HiddenInput(),
             'notes': forms.Textarea(attrs={"class": "form-control", "rows": 3}),
-        }
-        field_classes = {
-            "passengers": SafeModelMultipleChoiceField,
         }
 
 
@@ -154,7 +196,14 @@ class SpeakerToursInlineForm:
     def save(self):
         if not self.profile or self._selected_ids is None:
             return None
-        self.profile.tours.set(self._selected_ids)
+        selected_ids = set(self._selected_ids)
+        # Remove deselected tours
+        TourPassenger.objects.filter(speaker=self.profile).exclude(tour_id__in=selected_ids).delete()
+        # Add newly selected tours (default seats=1; the inline doesn't expose seats)
+        for tour_id in selected_ids:
+            TourPassenger.objects.get_or_create(
+                tour_id=tour_id, speaker=self.profile, defaults={"seats": 1}
+            )
         return self.profile
 
     def _render(self):

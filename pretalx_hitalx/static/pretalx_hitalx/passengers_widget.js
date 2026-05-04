@@ -8,6 +8,9 @@
  *       input.form-control           ← search / filter (never moves)
  *       .hitalx-pw-dropdown          ← floating option list
  *     .hitalx-pw-pills               ← selected speakers as removable pills
+ *       .hitalx-pw-pill              ← one pill per selected speaker
+ *         span.hitalx-pw-seats       ← seat count controls (×<input>)
+ *         button.hitalx-pw-pill-remove
  */
 (function () {
   function initOne(hiddenSelect) {
@@ -61,7 +64,27 @@
       if (opt) opt.selected = selected;
     }
 
+    /**
+     * Return the current seat count for a passenger:
+     *   1. From an existing seats input already in the pill row (survives re-renders)
+     *   2. From a hidden .hitalx-seats-initial[data-speaker=value] element in the page
+     *   3. Default: 1
+     */
+    function getSeatValue(value) {
+      var existing = pillRow.querySelector('input[data-seats-for="' + CSS.escape(value) + '"]');
+      if (existing) return existing.value;
+      var initial = document.querySelector('.hitalx-seats-initial[data-speaker="' + CSS.escape(value) + '"]');
+      if (initial) return initial.value;
+      return '1';
+    }
+
     function renderPills() {
+      // Save current seat input values before wiping the DOM
+      var savedSeats = {};
+      pillRow.querySelectorAll('input[data-seats-for]').forEach(function (inp) {
+        savedSeats[inp.dataset.seatsFor] = inp.value;
+      });
+
       pillRow.innerHTML = '';
       selectedValues().forEach(function (value) {
         var opt = allOptions.find(function (o) { return o.value === value; });
@@ -71,7 +94,34 @@
         pill.className = 'hitalx-pw-pill';
         pill.dataset.value = value;
 
-        pill.appendChild(document.createTextNode(opt.label));
+        // Speaker name label
+        var nameSpan = document.createElement('span');
+        nameSpan.className = 'hitalx-pw-pill-name';
+        nameSpan.textContent = opt.label;
+        pill.appendChild(nameSpan);
+
+        // Seat count: "× N"
+        var seatsWrap = document.createElement('span');
+        seatsWrap.className = 'hitalx-pw-seats';
+
+        var timesSpan = document.createElement('span');
+        timesSpan.className = 'hitalx-pw-seats-times';
+        timesSpan.textContent = '\u00d7\u202f'; // × narrow-space
+        seatsWrap.appendChild(timesSpan);
+
+        var seatsInput = document.createElement('input');
+        seatsInput.type = 'number';
+        seatsInput.name = 'hitalx-seats-' + value;
+        seatsInput.className = 'hitalx-pw-seats-input';
+        seatsInput.min = '1';
+        seatsInput.value = savedSeats.hasOwnProperty(value) ? savedSeats[value] : getSeatValue(value);
+        seatsInput.dataset.seatsFor = value;
+        // Prevent pill-row mousedown from propagating (avoids dropdown interference)
+        seatsInput.addEventListener('mousedown', function (e) { e.stopPropagation(); });
+        seatsInput.addEventListener('click', function (e) { e.stopPropagation(); });
+        seatsWrap.appendChild(seatsInput);
+
+        pill.appendChild(seatsWrap);
 
         var btn = document.createElement('button');
         btn.type = 'button';

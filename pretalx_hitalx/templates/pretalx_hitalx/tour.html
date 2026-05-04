@@ -38,6 +38,12 @@
         {# JS hides this select and builds the pill UI above it #}
         {{ form.passengers }}
         {{ form.passengers.errors }}
+        {# Initial seat values for the JS widget to read on page load #}
+        <div id="hitalx-seats-data" style="display:none">
+          {% for profile_id, seats in passenger_seats.items %}
+            <input type="hidden" class="hitalx-seats-initial" data-speaker="{{ profile_id }}" value="{{ seats }}">
+          {% endfor %}
+        </div>
       </div>
     </div>
 
