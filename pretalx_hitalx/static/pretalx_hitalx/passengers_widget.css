@@ -103,7 +103,7 @@ form > fieldset + fieldset {
 
 /* White box with dark text — clearly a clickable/editable input */
 .hitalx-pw-seats-input {
-  width: 2.8rem;
+  width: 2.8rem !important;
   padding: 1px 3px;
   font-size: 0.85em;
   color: #212529;
