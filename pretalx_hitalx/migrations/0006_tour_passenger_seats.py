@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        # 1. Create the explicit through model (new table with seats column)
+        # 1. Create the explicit through model table
         migrations.CreateModel(
             name='TourPassenger',
             fields=[
@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
                 'unique_together': {('tour', 'speaker')},
             },
         ),
-        # 2. Copy existing M2M data into the new through table (seats defaults to 1)
+        # 2. Copy existing M2M rows into the new through table (seats=1 for all)
         migrations.RunSQL(
             sql="""
                 INSERT INTO pretalx_hitalx_tourpassenger (tour_id, speaker_id, seats)
@@ -40,19 +40,25 @@ class Migration(migrations.Migration):
             """,
             reverse_sql=migrations.RunSQL.noop,
         ),
-        # 3. Update Django's internal state: Tour.passengers now uses the through model
-        migrations.AlterField(
+        # 3. Remove the old implicit M2M field (drops pretalx_hitalx_tour_passengers table)
+        migrations.RemoveField(
             model_name='tour',
             name='passengers',
-            field=models.ManyToManyField(
-                through='pretalx_hitalx.TourPassenger',
-                related_name='tours',
-                to='person.speakerprofile',
-            ),
         ),
-        # 4. Drop the old implicit M2M table (no longer needed)
-        migrations.RunSQL(
-            sql='DROP TABLE IF EXISTS pretalx_hitalx_tour_passengers',
-            reverse_sql=migrations.RunSQL.noop,
+        # 4. Add back the M2M field pointing at the through model.
+        #    State-only: the through table already exists from step 1.
+        migrations.SeparateDatabaseAndState(
+            state_operations=[
+                migrations.AddField(
+                    model_name='tour',
+                    name='passengers',
+                    field=models.ManyToManyField(
+                        through='pretalx_hitalx.TourPassenger',
+                        related_name='tours',
+                        to='person.speakerprofile',
+                    ),
+                ),
+            ],
+            database_operations=[],
         ),
     ]
