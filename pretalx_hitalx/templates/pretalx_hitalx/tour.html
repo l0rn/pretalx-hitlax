@@ -33,18 +33,19 @@
 
     <div class="form-group row">
       <label class="col-md-3 col-form-label" for="{{ form.passengers.id_for_label }}">
-        {{ form.passengers.label }}
+        {% translate "Passengers" %}
+        <small class="text-muted d-block">{% translate "Set seats per passenger with the × input inside each pill" %}</small>
       </label>
       <div class="col-md-9">
-        {# JS hides this select and builds the pill UI above it #}
-        {{ form.passengers }}
-        {{ form.passengers.errors }}
-        {# Initial seat values for the JS widget to read on page load #}
-        <div id="hitalx-seats-data" style="display:none">
+        {# Hidden seat initial values — read by passengers_widget.js on page load #}
+        <div style="display:none">
           {% for profile_id, seats in passenger_seats.items %}
             <input type="hidden" class="hitalx-seats-initial" data-speaker="{{ profile_id }}" value="{{ seats }}">
           {% endfor %}
         </div>
+        {# JS hides this select and builds the pill UI above it #}
+        {{ form.passengers }}
+        {{ form.passengers.errors }}
       </div>
     </div>
 

@@ -161,15 +161,21 @@ class SpeakerToursInlineForm:
         self._errors = {}
         self._is_valid = None
         self._selected_ids = None  # None means "not yet parsed from POST"
+        self._seats = {}  # {tour_id: seats} parsed from POST
 
         self._all_tours = []
         self._current_ids = set()
+        self._seat_map = {}  # {tour_id: seats} from DB
         if self.profile:
             with scope(event=self.profile.event):
                 self._all_tours = list(
                     Tour.objects.filter(event=self.profile.event).order_by("departure_time")
                 )
                 self._current_ids = set(self.profile.tours.values_list("id", flat=True))
+                self._seat_map = {
+                    tp.tour_id: tp.seats
+                    for tp in TourPassenger.objects.filter(speaker=self.profile)
+                }
 
     def is_valid(self):
         if self._is_valid is not None:
@@ -185,6 +191,15 @@ class SpeakerToursInlineForm:
             self._errors = {"tours": [str(_("Invalid selection"))]}
             self._is_valid = False
             return False
+        # Parse seat counts submitted as hitalx-seats-{tour_id}
+        self._seats = {}
+        for key in self.data:
+            if key.startswith("hitalx-seats-"):
+                try:
+                    tour_id = int(key[len("hitalx-seats-"):])
+                    self._seats[tour_id] = max(1, int(self.data[key]))
+                except (ValueError, TypeError):
+                    pass
         self._is_valid = True
         return True
 
@@ -199,10 +214,11 @@ class SpeakerToursInlineForm:
         selected_ids = set(self._selected_ids)
         # Remove deselected tours
         TourPassenger.objects.filter(speaker=self.profile).exclude(tour_id__in=selected_ids).delete()
-        # Add newly selected tours (default seats=1; the inline doesn't expose seats)
+        # Add/update tours with seat counts
         for tour_id in selected_ids:
-            TourPassenger.objects.get_or_create(
-                tour_id=tour_id, speaker=self.profile, defaults={"seats": 1}
+            seats = self._seats.get(tour_id, 1)
+            TourPassenger.objects.update_or_create(
+                tour_id=tour_id, speaker=self.profile, defaults={"seats": seats}
             )
         return self.profile
 
@@ -212,14 +228,22 @@ class SpeakerToursInlineForm:
 
         field_name = f"{self.prefix}-selected"
         options = ""
+        seat_initials = ""
         for tour in self._all_tours:
             when = date_format(localtime(tour.departure_time), format="SHORT_DATETIME_FORMAT")
             loc = str(_("Start location")) + ": " + tour.start_location
             label = f"{tour.description} — {when} — {loc}"
             sel = ' selected' if tour.id in self._current_ids else ''
             options += f'<option value="{tour.id}"{sel}>{label}</option>'
+            seats = self._seat_map.get(tour.id, 1)
+            seat_initials += f'<input type="hidden" class="hitalx-seats-initial" data-speaker="{tour.id}" value="{seats}">'
 
-        html = f'<div class="hitalx-section"><select multiple name="{field_name}" class="hitalx-pw-select">{options}</select></div>'
+        html = (
+            f'<div class="hitalx-section">'
+            f'<div style="display:none">{seat_initials}</div>'
+            f'<select multiple name="{field_name}" class="hitalx-pw-select">{options}</select>'
+            f'</div>'
+        )
         return mark_safe(html)
 
     def __html__(self):
